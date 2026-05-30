@@ -28,9 +28,15 @@ ${context ? `Previous conversation:\n${context}\n\n` : ''}User: ${message}`;
     );
 
     const data = await response.json();
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't get a response.";
+    
+    // Return full Gemini response for debugging
+    if (!data.candidates) {
+      return res.json({ reply: "Gemini error: " + JSON.stringify(data) });
+    }
+    
+    const reply = data.candidates[0].content.parts[0].text;
     res.json({ reply });
   } catch (err) {
-    res.status(500).json({ reply: "Server error. Please try again." });
+    res.status(500).json({ reply: "Server error: " + err.message });
   }
 }
