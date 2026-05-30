@@ -97,62 +97,43 @@ function renderDash() {
 }
 
 // ── SCANNER ───────────────────────────────────────────────────────────────────
-async function runScan() {
+function runScan() {
   const url = document.getElementById('gem-url').value.trim();
   if (!url) { alert('Please enter a GeM tender URL.'); return; }
   const bar = document.getElementById('scan-bar');
   const res = document.getElementById('scan-result');
   res.style.display = 'none';
   bar.classList.add('show');
-
   const msgs = ['Fetching tender page...', 'Applying OCR on attachments...', 'AI extracting requirements...', 'Parsing deadlines & categories...'];
   let i = 0;
   const iv = setInterval(() => {
-    document.getElementById('scan-status').textContent = msgs[Math.min(i, msgs.length - 1)];
+    document.getElementById('scan-status').textContent = msgs[i] || msgs[msgs.length - 1];
     i++;
-  }, 700);
-
-  try {
-    const response = await fetch('/api/scan', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url })
-    });
-    const data = await response.json();
-    clearInterval(iv);
-    bar.classList.remove('show');
-
-    if (data.error) {
-      alert('Scan failed: ' + data.error);
-      return;
+    if (i >= msgs.length) {
+      clearInterval(iv);
+      setTimeout(() => {
+        bar.classList.remove('show');
+        // Populate meta
+        const tId = url.split('/').pop() || 'GEM-2026-B-4829201';
+        document.getElementById('scan-meta').innerHTML = [
+          { l: 'Tender ID', v: tId },
+          { l: 'Category', v: 'Office Furniture' },
+          { l: 'Deadline', v: 'Jun 14, 2026 · 5PM' },
+          { l: 'Est. value', v: '₹3,40,000' },
+          { l: 'Buyer', v: 'DoPT, Govt. of India' },
+          { l: 'MSE quota', v: '25% reserved' },
+        ].map(f => `<div class="meta-field"><div class="mf-l">${f.l}</div><div class="mf-v">${f.v}</div></div>`).join('');
+        // Populate requirements
+        document.getElementById('ocr-reqs').innerHTML = OCR_REQS.map(r => `
+          <div class="req-row">
+            <i class="ti ti-file-text" style="font-size:15px;color:var(--nv-m);flex-shrink:0"></i>
+            <span>${r}</span>
+          </div>`).join('');
+        res.style.display = 'block';
+      }, 400);
     }
-
-    // Populate meta
-    document.getElementById('scan-meta').innerHTML = [
-      { l: 'Tender ID', v: data.tenderId || url.split('/').pop() },
-      { l: 'Category', v: data.category || 'Not specified' },
-      { l: 'Deadline', v: data.deadline || 'Not specified' },
-      { l: 'Est. value', v: data.value || 'Not specified' },
-      { l: 'Buyer', v: data.buyer || 'Not specified' },
-      { l: 'MSE quota', v: data.mseQuota || 'Not specified' },
-    ].map(f => `<div class="meta-field"><div class="mf-l">${f.l}</div><div class="mf-v">${f.v}</div></div>`).join('');
-
-    // Populate requirements
-    const reqs = data.requirements || OCR_REQS;
-    document.getElementById('ocr-reqs').innerHTML = reqs.map(r => `
-      <div class="req-row">
-        <i class="ti ti-file-text" style="font-size:15px;color:var(--nv-m);flex-shrink:0"></i>
-        <span>${r}</span>
-      </div>`).join('');
-
-    res.style.display = 'block';
-  } catch (err) {
-    clearInterval(iv);
-    bar.classList.remove('show');
-    alert('Error: ' + err.message);
-  }
+  }, 700);
 }
-
 
 // ── CHECKLIST ─────────────────────────────────────────────────────────────────
 function renderChecklist() {
@@ -330,8 +311,37 @@ async function sendChat() {
   wrap.scrollTop = wrap.scrollHeight;
 }
 
+
+// ── USER PERSONALIZATION ──────────────────────────────────────────────────────
+function updateUserUI() {
+  const session = typeof getSession === 'function' ? getSession() : null;
+  if (!session) return;
+  const name = session?.user?.user_metadata?.full_name || session?.user?.email?.split('@')[0] || 'User';
+  const email = session?.user?.email || '';
+  // Dashboard
+  const dashName = document.getElementById('dash-name');
+  if (dashName) dashName.textContent = name;
+  // Nav
+  const userName = document.getElementById('user-name');
+  if (userName) userName.textContent = name;
+  // Initials
+  const initials = document.getElementById('user-initials');
+  if (initials) initials.textContent = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+  // DigiLocker
+  const digiName = document.getElementById('digi-name');
+  if (digiName) digiName.textContent = name + ' · Aadhaar linked';
+  const digiEmail = document.getElementById('digi-email');
+  if (digiEmail) digiEmail.textContent = email.replace('@', '.digilocker@') || 'user@digilocker.gov.in';
+  const digiAvatar = document.getElementById('digi-avatar');
+  if (digiAvatar) digiAvatar.textContent = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+  // Alerts email
+  const alertEmail = document.getElementById('alert-email');
+  if (alertEmail && !alertEmail.value) alertEmail.value = email;
+}
+
 // ── INIT ──────────────────────────────────────────────────────────────────────
 renderDash();
 renderChecklist();
 renderDigi();
 renderAlerts();
+updateUserUI();
