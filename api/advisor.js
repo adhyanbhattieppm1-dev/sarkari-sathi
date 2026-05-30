@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -6,9 +6,8 @@ export default async function handler(req, res) {
 
   const { message, history = [] } = req.body;
 
-  // Build conversation context
   const context = history
-    .slice(-6) // last 3 exchanges
+    .slice(-6)
     .map(m => `${m.role === 'user' ? 'User' : 'Advisor'}: ${m.content}`)
     .join('\n');
 
@@ -16,18 +15,22 @@ export default async function handler(req, res) {
 
 ${context ? `Previous conversation:\n${context}\n\n` : ''}User: ${message}`;
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }]
-      })
-    }
-  );
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }]
+        })
+      }
+    );
 
-  const data = await response.json();
-  const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't get a response. Please try again.";
-  res.json({ reply });
+    const data = await response.json();
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't get a response.";
+    res.json({ reply });
+  } catch (err) {
+    res.status(500).json({ reply: "Server error. Please try again." });
+  }
 }
