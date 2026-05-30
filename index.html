@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SarkariSathi — GeM Compliance Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="brand">
+    <i class="ti ti-building-store"></i>
+    SarkariSathi
+    <span class="pill">BETA</span>
+  </div>
+  <button class="hamburger" onclick="toggleMenu()" aria-label="menu">
+    <i class="ti ti-menu-2"></i>
+  </button>
+  <div class="ntabs" id="ntabs">
+    <button class="ntab active" onclick="go('dash')"><i class="ti ti-home"></i> Dashboard</button>
+    <button class="ntab" onclick="go('scanner')"><i class="ti ti-scan"></i> Scanner</button>
+    <button class="ntab" onclick="go('checklist')"><i class="ti ti-checklist"></i> Checklist</button>
+    <button class="ntab" onclick="go('validator')"><i class="ti ti-shield-check"></i> Validator</button>
+    <button class="ntab" onclick="go('digilocker')"><i class="ti ti-lock"></i> DigiLocker</button>
+    <button class="ntab" onclick="go('alerts')"><i class="ti ti-bell"></i> Alerts</button>
+    <button class="ntab" onclick="go('advisor')"><i class="ti ti-robot"></i> AI Advisor</button>
+  </div>
+</nav>
+
+<div class="app">
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dash">
+    <div class="hero">
+      <div class="hero-text">
+        <h1>Welcome back, Rajesh Kumar</h1>
+        <p>Compliance score is strong. 2 tenders closing this week — take action now.</p>
+      </div>
+      <div class="hstats">
+        <div class="hs"><div class="hn">78%</div><div class="hl">Compliance</div></div>
+        <div class="hs"><div class="hn">4</div><div class="hl">Active tenders</div></div>
+        <div class="hs"><div class="hn">2</div><div class="hl">Docs expiring</div></div>
+        <div class="hs"><div class="hn">₹7.2L</div><div class="hl">Bid value</div></div>
+      </div>
+    </div>
+    <div class="grid4">
+      <div class="sc"><i class="ti ti-file-check sc-icon"></i><div class="sc-n">11</div><div class="sc-l">Docs uploaded</div></div>
+      <div class="sc"><i class="ti ti-alert-triangle sc-icon warn"></i><div class="sc-n warn">2</div><div class="sc-l">Expiring in 30d</div></div>
+      <div class="sc"><i class="ti ti-check sc-icon ok"></i><div class="sc-n ok">3</div><div class="sc-l">Bids submitted</div></div>
+      <div class="sc"><i class="ti ti-robot sc-icon pu"></i><div class="sc-n pu">Active</div><div class="sc-l">AI Advisor</div></div>
+    </div>
+    <div class="al al-warn"><i class="ti ti-alert-circle"></i><div><strong>Action needed:</strong> Udyam Registration Certificate expires Jun 15, 2026. Open DigiLocker to renew it.</div></div>
+    <div class="al al-info"><i class="ti ti-bulb"></i><div><strong>AI Tip:</strong> Tender GEM-2026-B-4829201 needs a BIS quality certificate. <a href="#" onclick="go('advisor');return false;">Ask the advisor</a> how to get one fast.</div></div>
+    <div class="sec"><h2>Active tenders</h2><span class="badge b-or">4 open</span></div>
+    <div id="dash-tenders"></div>
+  </div>
+
+  <!-- SCANNER -->
+  <div class="page" id="page-scanner">
+    <div class="sec"><h2>OCR tender scanner</h2><span class="badge b-nv">AI-powered</span></div>
+    <div class="card">
+      <div class="al al-info"><i class="ti ti-info-circle"></i><div>Paste a GeM tender URL. The OCR engine fetches the page, extracts text from attachments, and identifies all document requirements using AI.</div></div>
+      <div class="fg">
+        <label class="lbl">GeM tender URL</label>
+        <div class="row-inp">
+          <input type="url" id="gem-url" placeholder="https://gem.gov.in/opportunity/bid/view/GEM-2026-B-...">
+          <button class="btn btn-nv" onclick="runScan()"><i class="ti ti-scan"></i> Scan & OCR</button>
+        </div>
+      </div>
+      <div class="scanning-bar" id="scan-bar">
+        <div class="dot-loader"><span></span><span></span><span></span></div>
+        <span id="scan-status">Fetching tender page...</span>
+      </div>
+      <div id="scan-result" style="display:none">
+        <div class="al al-ok"><i class="ti ti-check"></i> OCR complete. Requirements extracted successfully.</div>
+        <div class="meta-grid" id="scan-meta"></div>
+        <div class="divider"></div>
+        <p style="font-size:13px;font-weight:500;margin-bottom:10px">Extracted document requirements</p>
+        <div id="ocr-reqs"></div>
+        <div class="btn-row" style="margin-top:14px">
+          <button class="btn btn-or" onclick="go('checklist')">Build checklist <i class="ti ti-arrow-right"></i></button>
+          <button class="btn" onclick="go('advisor')"><i class="ti ti-robot"></i> Ask AI Advisor</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHECKLIST -->
+  <div class="page" id="page-checklist">
+    <div class="sec"><h2>Compliance checklist</h2><span class="badge b-gn" id="cl-badge">0/8 done</span></div>
+    <div class="card" style="margin-bottom:12px">
+      <div class="prog-header">
+        <span style="font-size:12px;color:var(--txm)">Overall progress</span>
+        <span style="font-size:12px;font-weight:500" id="cl-pct">0%</span>
+      </div>
+      <div class="pb"><div class="pbf" id="cl-bar" style="width:0%"></div></div>
+    </div>
+    <div class="card"><div id="cl-items"></div></div>
+    <div class="btn-row" style="margin-top:14px">
+      <button class="btn btn-or" onclick="go('validator')">Validate docs <i class="ti ti-arrow-right"></i></button>
+      <button class="btn" onclick="go('advisor')"><i class="ti ti-robot"></i> Get AI help</button>
+    </div>
+  </div>
+
+  <!-- VALIDATOR -->
+  <div class="page" id="page-validator">
+    <div class="sec"><h2>Document validator</h2><span class="badge b-nv">Auto-check</span></div>
+    <div class="card" style="margin-bottom:12px">
+      <div class="uz" id="dropzone" onclick="document.getElementById('finput').click()" ondragover="event.preventDefault()" ondrop="handleDrop(event)">
+        <i class="ti ti-upload uz-icon"></i>
+        <p><strong>Click to upload</strong> or drag & drop</p>
+        <p class="uz-sub">PDF, JPG, PNG · max 5 MB each</p>
+      </div>
+      <input type="file" id="finput" multiple accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="handleFiles(this.files)">
+    </div>
+    <div id="val-result" style="display:none">
+      <div class="sec"><h2>Validation results</h2></div>
+      <div class="card"><div id="val-list"></div></div>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn btn-gn" onclick="submitBid()"><i class="ti ti-send"></i> Submit bid package</button>
+        <button class="btn" onclick="go('advisor')"><i class="ti ti-robot"></i> AI review</button>
+      </div>
+    </div>
+    <div class="modal-bg" id="success-modal">
+      <div class="modal">
+        <div class="modal-center">
+          <div class="modal-icon ok"><i class="ti ti-check"></i></div>
+          <h3>Bid package ready!</h3>
+          <p>All documents validated. Your GeM submission is compliance-ready.</p>
+        </div>
+        <div class="modal-meta">
+          <div class="mm-row"><span>Tender</span><span>GEM-2026-B-4829201</span></div>
+          <div class="mm-row"><span>Documents</span><span class="ok">4/4 passed</span></div>
+          <div class="mm-row"><span>Compliance score</span><span class="ok">96%</span></div>
+        </div>
+        <button class="btn btn-nv" style="width:100%" onclick="document.getElementById('success-modal').classList.remove('show')">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIGILOCKER -->
+  <div class="page" id="page-digilocker">
+    <div class="sec"><h2>DigiLocker</h2><span class="badge b-gn">Connected</span></div>
+    <div class="card" style="margin-bottom:14px">
+      <div class="al al-info"><i class="ti ti-lock-open"></i><div>Connected to DigiLocker via Aadhaar. Auto-fetch your government-issued certificates directly.</div></div>
+      <div class="digi-profile">
+        <div class="avatar">RK</div>
+        <div>
+          <div style="font-size:14px;font-weight:500">Rajesh Kumar · Aadhaar linked</div>
+          <div style="font-size:12px;color:var(--txm)">rajesh.kumar@digilocker.gov.in</div>
+        </div>
+        <button class="btn btn-sm" onclick="syncDigi(this)" style="margin-left:auto"><i class="ti ti-refresh"></i> Sync</button>
+      </div>
+    </div>
+    <div class="sec"><h2>Available documents</h2></div>
+    <div id="digi-list"></div>
+    <div style="margin-top:14px;display:flex;gap:8px">
+      <button class="btn btn-or" onclick="autoImport()"><i class="ti ti-download"></i> Auto-import all</button>
+    </div>
+    <div class="al al-ok" id="digi-ok" style="display:none;margin-top:12px"><i class="ti ti-check"></i> 5 documents imported to your vault.</div>
+  </div>
+
+  <!-- ALERTS -->
+  <div class="page" id="page-alerts">
+    <div class="sec"><h2>Email alerts</h2><span class="badge b-gn">Free via SendGrid</span></div>
+    <div class="card" style="margin-bottom:14px">
+      <div class="al al-ok"><i class="ti ti-mail"></i><div>Email alerts are completely free using SendGrid (100 emails/day free tier). No WhatsApp cost needed.</div></div>
+      <div class="fg2">
+        <div class="fg"><label class="lbl">Email address</label><input type="email" value="rajesh.kumar@gmail.com" id="alert-email"></div>
+        <div class="fg"><label class="lbl">Language</label>
+          <select id="alert-lang" onchange="renderEmailPreview()">
+            <option value="en">English</option>
+            <option value="hi">हिन्दी</option>
+            <option value="pa">ਪੰਜਾਬੀ</option>
+            <option value="mr">मराठी</option>
+          </select>
+        </div>
+      </div>
+      <div style="font-size:12px;font-weight:500;color:var(--txm);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px">Alert triggers</div>
+      <div id="alert-triggers"></div>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn btn-gn btn-sm" onclick="testEmail(this)"><i class="ti ti-mail"></i> Send test email</button>
+        <button class="btn btn-sm">Save settings</button>
+      </div>
+    </div>
+    <div class="sec"><h2>Email preview</h2></div>
+    <div id="email-preview"></div>
+  </div>
+
+  <!-- AI ADVISOR -->
+  <div class="page" id="page-advisor">
+    <div class="sec"><h2>AI compliance advisor</h2><span class="badge b-pu">Powered by Claude</span></div>
+    <div class="card">
+      <div class="chat-wrap" id="chat-wrap">
+        <div class="msg ai">
+          <div class="msg-sender"><i class="ti ti-robot"></i> GeM Advisor</div>
+          Hello! I'm your GeM compliance advisor. Ask me anything about document requirements, tender eligibility, Udyam registration, BIS certificates, or GeM policies.
+        </div>
+      </div>
+      <div class="chat-inp-row">
+        <input type="text" id="chat-inp" placeholder="Ask about documents, eligibility, deadlines..." onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="btn btn-nv" onclick="sendChat()"><i class="ti ti-send"></i></button>
+      </div>
+      <div class="quick-qs">
+        <button class="btn btn-sm" onclick="quickQ('What documents do I need for a furniture tender on GeM?')">Furniture tender docs ↗</button>
+        <button class="btn btn-sm" onclick="quickQ('My Udyam certificate is expiring soon. What should I do?')">Udyam expiry ↗</button>
+        <button class="btn btn-sm" onclick="quickQ('How do I get a BIS certificate for my products?')">BIS certificate ↗</button>
+        <button class="btn btn-sm" onclick="quickQ('What is the MSE purchase preference policy on GeM?')">MSE preference ↗</button>
+        <button class="btn btn-sm" onclick="quickQ('How do I register my business on GeM portal?')">GeM registration ↗</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
