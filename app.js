@@ -291,18 +291,13 @@ async function sendChat() {
   chatHistory.push({ role: 'user', content: q });
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('/api/advisor', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: `You are a GeM (Government e-Marketplace) compliance advisor for Indian MSMEs. You help small business owners understand document requirements, tender eligibility, Udyam registration, BIS/ISO certificates, GeM portal policies, and bid compliance. Be concise, practical, and specific to Indian government procurement rules. Use simple language. Answer in 2-4 short paragraphs max. If relevant, mention specific portal URLs like gem.gov.in or udyamregistration.gov.in.`,
-        messages: chatHistory
-      })
+      body: JSON.stringify({ message: q, history: chatHistory })
     });
     const data = await res.json();
-    const reply = data.content?.map(b => b.type === 'text' ? b.text : '').join('') || 'Sorry, I could not get a response. Please try again.';
+    const reply = data.reply || 'Sorry, I could not get a response. Please try again.';
     chatHistory.push({ role: 'assistant', content: reply });
     aiMsg.innerHTML = `<div class="msg-sender"><i class="ti ti-robot"></i> GeM Advisor</div>${reply.replace(/\n/g, '<br>')}`;
   } catch (e) {
