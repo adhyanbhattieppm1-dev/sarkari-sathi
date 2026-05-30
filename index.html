@@ -8,8 +8,168 @@
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* AUTH PAGE */
+    #auth-page {
+      display: flex;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      padding: 24px;
+    }
+    .auth-box {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.08);
+    }
+    .auth-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 20px;
+      color: var(--nv-d);
+      margin-bottom: 28px;
+    }
+    .auth-logo .pill { font-size: 10px; }
+    #auth-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--tx);
+    }
+    .auth-sub {
+      font-size: 13px;
+      color: var(--txm);
+      margin-bottom: 24px;
+    }
+    .auth-field {
+      margin-bottom: 14px;
+    }
+    .auth-field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--txm);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+    .auth-field input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      background: var(--bg);
+      color: var(--tx);
+      box-sizing: border-box;
+      transition: border .2s;
+    }
+    .auth-field input:focus {
+      outline: none;
+      border-color: var(--nv-m);
+    }
+    #auth-error {
+      color: #e53e3e;
+      font-size: 13px;
+      margin-bottom: 12px;
+      min-height: 18px;
+    }
+    #auth-btn {
+      width: 100%;
+      padding: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    #auth-toggle {
+      background: none;
+      border: none;
+      color: var(--nv-m);
+      font-size: 13px;
+      cursor: pointer;
+      padding: 0;
+      text-decoration: underline;
+    }
+    .auth-divider {
+      text-align: center;
+      font-size: 12px;
+      color: var(--txm);
+      margin: 20px 0 16px;
+    }
+    /* USER MENU */
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+      padding-right: 16px;
+    }
+    .user-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--nv-m);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .signout-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 12px;
+      color: var(--txm);
+      cursor: pointer;
+    }
+    .signout-btn:hover { background: var(--bg); }
+  </style>
 </head>
 <body>
+
+<!-- AUTH PAGE -->
+<div id="auth-page" style="display:none">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <i class="ti ti-building-store"></i>
+      SarkariSathi
+      <span class="pill">BETA</span>
+    </div>
+    <div id="auth-title">Sign in</div>
+    <div class="auth-sub">GeM compliance platform for Indian MSMEs</div>
+    <div class="auth-field" id="auth-name-row" style="display:none">
+      <label>Full name</label>
+      <input type="text" id="auth-name" placeholder="Rajesh Kumar">
+    </div>
+    <div class="auth-field">
+      <label>Email</label>
+      <input type="email" id="auth-email" placeholder="you@example.com">
+    </div>
+    <div class="auth-field">
+      <label>Password</label>
+      <input type="password" id="auth-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')handleAuth()">
+    </div>
+    <div id="auth-error"></div>
+    <button class="btn btn-nv" id="auth-btn" onclick="handleAuth()">Sign in</button>
+    <div style="text-align:center">
+      <button id="auth-toggle" onclick="toggleAuthMode()">Don't have an account? Sign up</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="main-app" style="display:none">
 
 <nav class="nav">
   <div class="brand">
@@ -29,6 +189,11 @@
     <button class="ntab" onclick="go('alerts')"><i class="ti ti-bell"></i> Alerts</button>
     <button class="ntab" onclick="go('advisor')"><i class="ti ti-robot"></i> AI Advisor</button>
   </div>
+  <div class="user-menu">
+    <div class="user-avatar" id="user-initials">U</div>
+    <span style="font-size:13px;font-weight:500" id="user-name"></span>
+    <button class="signout-btn" onclick="signOut()"><i class="ti ti-logout"></i> Sign out</button>
+  </div>
 </nav>
 
 <div class="app">
@@ -37,7 +202,7 @@
   <div class="page active" id="page-dash">
     <div class="hero">
       <div class="hero-text">
-        <h1>Welcome back, Rajesh Kumar</h1>
+        <h1>Welcome back, <span id="dash-name">User</span></h1>
         <p>Compliance score is strong. 2 tenders closing this week — take action now.</p>
       </div>
       <div class="hstats">
@@ -148,10 +313,10 @@
     <div class="card" style="margin-bottom:14px">
       <div class="al al-info"><i class="ti ti-lock-open"></i><div>Connected to DigiLocker via Aadhaar. Auto-fetch your government-issued certificates directly.</div></div>
       <div class="digi-profile">
-        <div class="avatar">RK</div>
+        <div class="avatar" id="digi-avatar">U</div>
         <div>
-          <div style="font-size:14px;font-weight:500">Rajesh Kumar · Aadhaar linked</div>
-          <div style="font-size:12px;color:var(--txm)">rajesh.kumar@digilocker.gov.in</div>
+          <div style="font-size:14px;font-weight:500" id="digi-name">User · Aadhaar linked</div>
+          <div style="font-size:12px;color:var(--txm)" id="digi-email">user@digilocker.gov.in</div>
         </div>
         <button class="btn btn-sm" onclick="syncDigi(this)" style="margin-left:auto"><i class="ti ti-refresh"></i> Sync</button>
       </div>
@@ -170,7 +335,7 @@
     <div class="card" style="margin-bottom:14px">
       <div class="al al-ok"><i class="ti ti-mail"></i><div>Email alerts are completely free using SendGrid (100 emails/day free tier). No WhatsApp cost needed.</div></div>
       <div class="fg2">
-        <div class="fg"><label class="lbl">Email address</label><input type="email" value="rajesh.kumar@gmail.com" id="alert-email"></div>
+        <div class="fg"><label class="lbl">Email address</label><input type="email" id="alert-email"></div>
         <div class="fg"><label class="lbl">Language</label>
           <select id="alert-lang" onchange="renderEmailPreview()">
             <option value="en">English</option>
@@ -193,7 +358,7 @@
 
   <!-- AI ADVISOR -->
   <div class="page" id="page-advisor">
-    <div class="sec"><h2>AI compliance advisor</h2><span class="badge b-pu">Powered by Claude</span></div>
+    <div class="sec"><h2>AI compliance advisor</h2><span class="badge b-pu">Powered by Gemini</span></div>
     <div class="card">
       <div class="chat-wrap" id="chat-wrap">
         <div class="msg ai">
@@ -216,7 +381,9 @@
   </div>
 
 </div>
+</div><!-- end main-app -->
 
+<script src="auth.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
