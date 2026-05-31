@@ -17,7 +17,7 @@ ${context ? `Previous conversation:\n${context}\n\n` : ''}User: ${message}`;
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -28,12 +28,9 @@ ${context ? `Previous conversation:\n${context}\n\n` : ''}User: ${message}`;
     );
 
     const data = await response.json();
-    
-    // Return full Gemini response for debugging
     if (!data.candidates) {
       return res.json({ reply: "Gemini error: " + JSON.stringify(data) });
     }
-    
     const reply = data.candidates[0].content.parts[0].text;
     res.json({ reply });
   } catch (err) {
