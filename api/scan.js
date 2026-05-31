@@ -10,7 +10,6 @@ module.exports = async function handler(req, res) {
   let pageText = "";
 
   try {
-    // Try to fetch the page
     const pageRes = await fetch(url, {
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36",
@@ -19,19 +18,17 @@ module.exports = async function handler(req, res) {
       signal: AbortSignal.timeout(8000)
     });
     const html = await pageRes.text();
-    // Strip HTML tags and clean up
     pageText = html
       .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
       .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
       .replace(/<[^>]+>/g, ' ')
       .replace(/\s+/g, ' ')
       .trim()
-      .slice(0, 6000); // limit to 6000 chars for Gemini
+      .slice(0, 6000);
   } catch (err) {
     pageText = `Could not fetch page directly. URL provided: ${url}`;
   }
 
-  // Now ask Gemini to extract requirements
   const prompt = `You are analyzing a Government e-Marketplace (GeM) tender page. Extract the following from the text below and respond in JSON format only, no markdown:
 
 {
@@ -51,7 +48,7 @@ ${pageText}`;
 
   try {
     const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -67,7 +64,6 @@ ${pageText}`;
     }
 
     let text = data.candidates[0].content.parts[0].text;
-    // Clean up markdown if present
     text = text.replace(/```json|```/g, '').trim();
     const parsed = JSON.parse(text);
     res.json(parsed);
