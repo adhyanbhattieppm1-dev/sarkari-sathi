@@ -4,32 +4,35 @@ module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   if (req.method === "OPTIONS") return res.status(200).end();
 
-  const { url } = req.body;
-  if (!url) return res.status(400).json({ error: "URL required" });
+  const { url, fileText } = req.body;
+  if (!url && !fileText) return res.status(400).json({ error: "URL or file text required" });
 
-  let pageText = "";
+  let pageText = fileText || "";
 
-  try {
-    const pageRes = await fetch(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-      },
-      signal: AbortSignal.timeout(8000)
-    });
-    const html = await pageRes.text();
-    pageText = html
-      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-      .replace(/<[^>]+>/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim()
-      .slice(0, 6000);
-  } catch (err) {
-    pageText = `Could not fetch page directly. URL provided: ${url}`;
+  // Only try URL fetch if no file was provided
+  if (!fileText && url) {
+    try {
+      const pageRes = await fetch(url, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36",
+          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        },
+        signal: AbortSignal.timeout(8000)
+      });
+      const html = await pageRes.text();
+      pageText = html
+        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 6000);
+    } catch (err) {
+      pageText = `Could not fetch page. URL: ${url}`;
+    }
   }
 
-  const prompt = `You are analyzing a Government e-Marketplace (GeM) tender page. Extract the following from the text below and respond in JSON format only, no markdown:
+  const prompt = `You are analyzing a Government e-Marketplace (GeM) tender document. Extract the following and respond in JSON format only, no markdown:
 
 {
   "tenderId": "tender ID or bid number",
@@ -41,9 +44,9 @@ module.exports = async function handler(req, res) {
   "requirements": ["list", "of", "required", "documents"]
 }
 
-If you cannot find specific info, use "Not specified". For requirements, list all documents, certificates, registrations mentioned.
+If you cannot find specific info, use "Not specified". For requirements, list ALL documents, certificates, registrations mentioned.
 
-Page text:
+Document text:
 ${pageText}`;
 
   try {
