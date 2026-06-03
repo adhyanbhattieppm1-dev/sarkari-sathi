@@ -117,20 +117,37 @@ async function runScan() {
   }, 700);
 
   try {
-    let fileText = '';
+    let body = { url: url || '' };
+
     if (file) {
-      fileText = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = e => resolve(e.target.result);
-        reader.onerror = reject;
-        reader.readAsText(file);
-      });
+      const isPDF = file.type === 'application/pdf' || file.name.endsWith('.pdf');
+      const isImage = file.type.startsWith('image/');
+
+      if (isPDF || isImage) {
+        // Send as base64 for native Gemini understanding
+        const base64 = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = e => resolve(e.target.result.split(',')[1]);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+        body = { fileBase64: base64, fileType: file.type || 'application/pdf' };
+      } else {
+        // Word/text files - read as text
+        const text = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = e => resolve(e.target.result);
+          reader.onerror = reject;
+          reader.readAsText(file);
+        });
+        body = { fileText: text };
+      }
     }
 
     const response = await fetch('/api/scan', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url: url || '', fileText })
+      body: JSON.stringify(body)
     });
     const data = await response.json();
     clearInterval(iv);
