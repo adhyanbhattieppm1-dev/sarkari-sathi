@@ -65,6 +65,11 @@ function getUserName() {
   return session?.user?.user_metadata?.full_name || session?.user?.email?.split('@')[0] || 'User';
 }
 
+function getUserEmail() {
+  const session = getSession();
+  return session?.user?.email || '';
+}
+
 // ── AUTH PAGE ─────────────────────────────────────────────────────────────────
 function showAuthPage() {
   document.getElementById('auth-page').style.display = 'flex';
@@ -74,10 +79,32 @@ function showAuthPage() {
 function showApp() {
   document.getElementById('auth-page').style.display = 'none';
   document.getElementById('main-app').style.display = 'block';
-  // Update user name
+
   const name = getUserName();
-  const nameEl = document.getElementById('user-name');
-  if (nameEl) nameEl.textContent = name;
+  const email = getUserEmail();
+  const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+
+  // Nav name + initials
+  const userNameEl = document.getElementById('user-name');
+  if (userNameEl) userNameEl.textContent = name;
+  const userInitialsEl = document.getElementById('user-initials');
+  if (userInitialsEl) userInitialsEl.textContent = initials;
+
+  // Dashboard welcome
+  const dashName = document.getElementById('dash-name');
+  if (dashName) dashName.textContent = name;
+
+  // DigiLocker
+  const digiName = document.getElementById('digi-name');
+  if (digiName) digiName.textContent = name + ' · Aadhaar linked';
+  const digiEmail = document.getElementById('digi-email');
+  if (digiEmail) digiEmail.textContent = email;
+  const digiAvatar = document.getElementById('digi-avatar');
+  if (digiAvatar) digiAvatar.textContent = initials;
+
+  // Alerts email
+  const alertEmail = document.getElementById('alert-email');
+  if (alertEmail) alertEmail.value = email;
 }
 
 function toggleAuthMode() {
