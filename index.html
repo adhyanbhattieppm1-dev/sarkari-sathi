@@ -228,13 +228,23 @@
   <div class="page" id="page-scanner">
     <div class="sec"><h2>OCR tender scanner</h2><span class="badge b-nv">AI-powered</span></div>
     <div class="card">
-      <div class="al al-info"><i class="ti ti-info-circle"></i><div>Paste a GeM tender URL. The OCR engine fetches the page, extracts text from attachments, and identifies all document requirements using AI.</div></div>
+      <div class="al al-info"><i class="ti ti-info-circle"></i><div>Paste a GeM tender URL <strong>or upload a PDF/Word file</strong>. The AI extracts all document requirements, deadlines, and eligibility criteria.</div></div>
       <div class="fg">
         <label class="lbl">GeM tender URL</label>
         <div class="row-inp">
           <input type="url" id="gem-url" placeholder="https://gem.gov.in/opportunity/bid/view/GEM-2026-B-...">
           <button class="btn btn-nv" onclick="runScan()"><i class="ti ti-scan"></i> Scan & OCR</button>
         </div>
+      </div>
+      <div style="text-align:center;font-size:12px;color:var(--txm);margin:8px 0">— or upload tender document —</div>
+      <div class="fg">
+        <label class="lbl">Upload PDF or Word file</label>
+        <div class="uz" style="padding:16px" onclick="document.getElementById('scan-file').click()">
+          <i class="ti ti-file-upload" style="font-size:24px;color:var(--nv-m)"></i>
+          <p style="margin:4px 0 0"><strong>Click to upload</strong> tender PDF or Word doc</p>
+          <p class="uz-sub" id="scan-file-name">PDF, DOC, DOCX supported</p>
+        </div>
+        <input type="file" id="scan-file" accept=".pdf,.doc,.docx,.txt" style="display:none" onchange="document.getElementById('scan-file-name').textContent = this.files[0]?.name || 'PDF, DOC, DOCX supported'">
       </div>
       <div class="scanning-bar" id="scan-bar">
         <div class="dot-loader"><span></span><span></span><span></span></div>
