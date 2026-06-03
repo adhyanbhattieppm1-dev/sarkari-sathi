@@ -97,43 +97,71 @@ function renderDash() {
 }
 
 // ── SCANNER ───────────────────────────────────────────────────────────────────
-function runScan() {
+async function runScan() {
   const url = document.getElementById('gem-url').value.trim();
-  if (!url) { alert('Please enter a GeM tender URL.'); return; }
+  const fileInput = document.getElementById('scan-file');
+  const file = fileInput && fileInput.files[0];
+
+  if (!url && !file) { alert('Please enter a GeM tender URL or upload a file.'); return; }
+
   const bar = document.getElementById('scan-bar');
   const res = document.getElementById('scan-result');
   res.style.display = 'none';
   bar.classList.add('show');
-  const msgs = ['Fetching tender page...', 'Applying OCR on attachments...', 'AI extracting requirements...', 'Parsing deadlines & categories...'];
+
+  const msgs = ['Reading document...', 'Applying OCR...', 'AI extracting requirements...', 'Parsing details...'];
   let i = 0;
   const iv = setInterval(() => {
-    document.getElementById('scan-status').textContent = msgs[i] || msgs[msgs.length - 1];
+    document.getElementById('scan-status').textContent = msgs[Math.min(i, msgs.length-1)];
     i++;
-    if (i >= msgs.length) {
-      clearInterval(iv);
-      setTimeout(() => {
-        bar.classList.remove('show');
-        // Populate meta
-        const tId = url.split('/').pop() || 'GEM-2026-B-4829201';
-        document.getElementById('scan-meta').innerHTML = [
-          { l: 'Tender ID', v: tId },
-          { l: 'Category', v: 'Office Furniture' },
-          { l: 'Deadline', v: 'Jun 14, 2026 · 5PM' },
-          { l: 'Est. value', v: '₹3,40,000' },
-          { l: 'Buyer', v: 'DoPT, Govt. of India' },
-          { l: 'MSE quota', v: '25% reserved' },
-        ].map(f => `<div class="meta-field"><div class="mf-l">${f.l}</div><div class="mf-v">${f.v}</div></div>`).join('');
-        // Populate requirements
-        document.getElementById('ocr-reqs').innerHTML = OCR_REQS.map(r => `
-          <div class="req-row">
-            <i class="ti ti-file-text" style="font-size:15px;color:var(--nv-m);flex-shrink:0"></i>
-            <span>${r}</span>
-          </div>`).join('');
-        res.style.display = 'block';
-      }, 400);
-    }
   }, 700);
+
+  try {
+    let fileText = '';
+    if (file) {
+      fileText = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.onerror = reject;
+        reader.readAsText(file);
+      });
+    }
+
+    const response = await fetch('/api/scan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: url || '', fileText })
+    });
+    const data = await response.json();
+    clearInterval(iv);
+    bar.classList.remove('show');
+
+    if (data.error) { alert('Scan failed: ' + data.error); return; }
+
+    document.getElementById('scan-meta').innerHTML = [
+      { l: 'Tender ID', v: data.tenderId || (url ? url.split('/').pop() : 'From file') },
+      { l: 'Category', v: data.category || 'Not specified' },
+      { l: 'Deadline', v: data.deadline || 'Not specified' },
+      { l: 'Est. value', v: data.value || 'Not specified' },
+      { l: 'Buyer', v: data.buyer || 'Not specified' },
+      { l: 'MSE quota', v: data.mseQuota || 'Not specified' },
+    ].map(f => `<div class="meta-field"><div class="mf-l">${f.l}</div><div class="mf-v">${f.v}</div></div>`).join('');
+
+    const reqs = data.requirements || OCR_REQS;
+    document.getElementById('ocr-reqs').innerHTML = reqs.map(r => `
+      <div class="req-row">
+        <i class="ti ti-file-text" style="font-size:15px;color:var(--nv-m);flex-shrink:0"></i>
+        <span>${r}</span>
+      </div>`).join('');
+
+    res.style.display = 'block';
+  } catch (err) {
+    clearInterval(iv);
+    bar.classList.remove('show');
+    alert('Error: ' + err.message);
+  }
 }
+
 
 // ── CHECKLIST ─────────────────────────────────────────────────────────────────
 function renderChecklist() {
@@ -291,18 +319,13 @@ async function sendChat() {
   chatHistory.push({ role: 'user', content: q });
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('/api/advisor', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: `You are a GeM (Government e-Marketplace) compliance advisor for Indian MSMEs. You help small business owners understand document requirements, tender eligibility, Udyam registration, BIS/ISO certificates, GeM portal policies, and bid compliance. Be concise, practical, and specific to Indian government procurement rules. Use simple language. Answer in 2-4 short paragraphs max. If relevant, mention specific portal URLs like gem.gov.in or udyamregistration.gov.in.`,
-        messages: chatHistory
-      })
+      body: JSON.stringify({ message: q, history: chatHistory })
     });
     const data = await res.json();
-    const reply = data.content?.map(b => b.type === 'text' ? b.text : '').join('') || 'Sorry, I could not get a response. Please try again.';
+    const reply = data.reply || 'Sorry, I could not get a response. Please try again.';
     chatHistory.push({ role: 'assistant', content: reply });
     aiMsg.innerHTML = `<div class="msg-sender"><i class="ti ti-robot"></i> GeM Advisor</div>${reply.replace(/\n/g, '<br>')}`;
   } catch (e) {
