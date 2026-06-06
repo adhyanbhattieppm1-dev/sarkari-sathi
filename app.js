@@ -55,6 +55,7 @@ const EMAIL_MESSAGES = {
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
 let chatHistory = [];
+let scannedRequirements = null; // stores requirements from last scan
 
 // ── NAVIGATION ────────────────────────────────────────────────────────────────
 function go(p) {
@@ -165,6 +166,8 @@ async function runScan() {
     ].map(f => `<div class="meta-field"><div class="mf-l">${f.l}</div><div class="mf-v">${f.v}</div></div>`).join('');
 
     const reqs = data.requirements || OCR_REQS;
+    scannedRequirements = reqs; // save for checklist
+
     document.getElementById('ocr-reqs').innerHTML = reqs.map(r => `
       <div class="req-row">
         <i class="ti ti-file-text" style="font-size:15px;color:var(--nv-m);flex-shrink:0"></i>
@@ -181,6 +184,36 @@ async function runScan() {
 
 
 // ── CHECKLIST ─────────────────────────────────────────────────────────────────
+
+// Maps requirement text to a tag category
+function inferTag(name) {
+  const n = name.toLowerCase();
+  if (n.includes('udyam') || n.includes('msme') || n.includes('pan') || n.includes('aadhaar') || n.includes('identity')) return 'Identity';
+  if (n.includes('gst') || n.includes('tax') || n.includes('itr') || n.includes('income')) return 'Tax';
+  if (n.includes('bank') || n.includes('cheque') || n.includes('guarantee') || n.includes('emd') || n.includes('security deposit') || n.includes('cpbg')) return 'Finance';
+  if (n.includes('iso') || n.includes('bis') || n.includes('quality') || n.includes('test certificate') || n.includes('sa8000')) return 'Quality';
+  if (n.includes('integrity') || n.includes('ehs') || n.includes('compliance') || n.includes('terms') || n.includes('gtc') || n.includes('atc')) return 'Compliance';
+  if (n.includes('price') || n.includes('boq') || n.includes('bid value') || n.includes('rate')) return 'Pricing';
+  if (n.includes('registration') || n.includes('empanelment') || n.includes('nalco') || n.includes('experience')) return 'Eligibility';
+  if (n.includes('warranty') || n.includes('delivery') || n.includes('supply')) return 'Supply';
+  return 'Document';
+}
+
+function buildChecklistFromScan() {
+  if (!scannedRequirements || scannedRequirements.length === 0) {
+    go('checklist');
+    return;
+  }
+  // Convert scanned requirements into CL_ITEMS format
+  // Clear old items and rebuild from scan
+  CL_ITEMS.length = 0;
+  scannedRequirements.forEach(req => {
+    CL_ITEMS.push({ n: req, d: 'Required for this tender submission.', t: inferTag(req), s: 'pending' });
+  });
+  go('checklist');
+  renderChecklist();
+}
+
 function renderChecklist() {
   const done = CL_ITEMS.filter(x => x.s === 'done').length;
   const pct = Math.round(done / CL_ITEMS.length * 100);
