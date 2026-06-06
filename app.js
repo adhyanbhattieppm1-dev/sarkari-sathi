@@ -246,7 +246,6 @@ const valUploads = {}; // index -> { name, status }
 
 // Statuses cycle: some valid, one expiring, makes it look real
 function mockStatus(i) {
-  if (i % 7 === 3) return { s: 'warn', label: 'Expiring Soon', icon: 'ti-alert-triangle' };
   return { s: 'pass', label: 'Valid · Verified', icon: 'ti-check' };
 }
 
@@ -313,7 +312,7 @@ function handleDrop(e) { e.preventDefault(); }
 function submitBid() {
   const uploaded = Object.keys(valUploads).length;
   const total = CL_ITEMS.length;
-  const score = total ? Math.min(99, Math.round((uploaded / total) * 100) + 5) : 96;
+  const score = total ? Math.round((uploaded / total) * 100) : 100;
 
   // Pull tender ID from scan result if available
   const tenderEl = document.querySelector('.mf-v');
