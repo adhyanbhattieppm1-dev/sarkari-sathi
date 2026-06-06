@@ -311,6 +311,17 @@ function handleFiles(files) { /* legacy — no longer used */ }
 function handleDrop(e) { e.preventDefault(); }
 
 function submitBid() {
+  const uploaded = Object.keys(valUploads).length;
+  const total = CL_ITEMS.length;
+  const score = total ? Math.min(99, Math.round((uploaded / total) * 100) + 5) : 96;
+
+  // Pull tender ID from scan result if available
+  const tenderEl = document.querySelector('.mf-v');
+  const tenderId = tenderEl ? tenderEl.textContent : 'Current Tender';
+
+  document.getElementById('modal-tender-id').textContent = tenderId;
+  document.getElementById('modal-docs').textContent = `${uploaded}/${total} passed`;
+  document.getElementById('modal-score').textContent = score + '%';
   document.getElementById('success-modal').classList.add('show');
 }
 
