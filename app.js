@@ -65,6 +65,7 @@ function go(p) {
   const ps = ['dash', 'scanner', 'checklist', 'validator', 'digilocker', 'alerts', 'advisor'];
   const i = ps.indexOf(p);
   if (i >= 0) document.querySelectorAll('.ntab')[i].classList.add('active');
+  if (p === 'validator') renderValidator();
   // close mobile menu
   document.getElementById('ntabs').classList.remove('open');
   window.scrollTo(0, 0);
@@ -239,37 +240,75 @@ function toggleCl(i) {
 }
 
 // ── VALIDATOR ─────────────────────────────────────────────────────────────────
-function handleFiles(files) {
-  if (!files || files.length === 0) return;
-  showValidationResults(Array.from(files).map(f => f.name));
+
+// Track upload state per requirement index
+const valUploads = {}; // index -> { name, status }
+
+// Statuses cycle: some valid, one expiring, makes it look real
+function mockStatus(i) {
+  if (i % 7 === 3) return { s: 'warn', label: 'Expiring Soon', icon: 'ti-alert-triangle' };
+  return { s: 'pass', label: 'Valid · Verified', icon: 'ti-check' };
 }
 
-function handleDrop(e) {
-  e.preventDefault();
-  const files = e.dataTransfer.files;
-  if (files.length) showValidationResults(Array.from(files).map(f => f.name));
-}
+function renderValidator() {
+  const noScan = document.getElementById('val-no-scan');
+  const main = document.getElementById('val-main');
 
-function showValidationResults(fileNames) {
-  const template = [
-    { ic: 'ti-certificate', s: 'warn', sl: 'Valid · Expires Jun 15' },
-    { ic: 'ti-receipt-tax', s: 'pass', sl: 'Valid · Permanent' },
-    { ic: 'ti-id', s: 'pass', sl: 'Valid · Format OK' },
-    { ic: 'ti-rosette', s: 'pass', sl: 'Valid · Mar 2027' },
-  ];
-  document.getElementById('val-result').style.display = 'block';
-  document.getElementById('val-list').innerHTML = fileNames.slice(0, 6).map((name, i) => {
-    const t = template[i % template.length];
-    const kb = Math.round(Math.random() * 300 + 80);
-    return `<div class="doc-row">
-      <i class="ti ${t.ic}" style="font-size:19px;color:var(--nv-m);flex-shrink:0"></i>
-      <div style="flex:1"><div style="font-size:13px;font-weight:500">${name}</div><div style="font-size:11px;color:var(--txm)">PDF · ${kb} KB</div></div>
-      <div class="${t.s === 'pass' ? 'vp' : t.s === 'warn' ? 'vw' : 'vf'}">
-        <i class="ti ${t.s === 'pass' ? 'ti-check' : t.s === 'warn' ? 'ti-alert-triangle' : 'ti-x'}"></i>${t.sl}
+  if (!CL_ITEMS || CL_ITEMS.length === 0) {
+    noScan.style.display = 'block';
+    main.style.display = 'none';
+    return;
+  }
+
+  noScan.style.display = 'none';
+  main.style.display = 'block';
+
+  const uploaded = Object.keys(valUploads).length;
+  const total = CL_ITEMS.length;
+  const pct = total ? Math.round(uploaded / total * 100) : 0;
+
+  document.getElementById('val-count').textContent = `${uploaded} of ${total} uploaded`;
+  document.getElementById('val-bar').style.width = pct + '%';
+
+  document.getElementById('val-rows').innerHTML = CL_ITEMS.map((item, i) => {
+    const up = valUploads[i];
+    const st = up ? mockStatus(i) : null;
+    return `
+    <div class="doc-row" id="vrow-${i}">
+      <i class="ti ti-file-text" style="font-size:19px;color:var(--nv-m);flex-shrink:0"></i>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:500">${item.n}</div>
+        <div style="font-size:11px;color:var(--txm)">${up ? up.name : 'No file uploaded'}</div>
+      </div>
+      <div id="vstatus-${i}">
+        ${up
+          ? `<div class="${st.s === 'pass' ? 'vp' : 'vw'}"><i class="ti ${st.icon}"></i> ${st.label}</div>`
+          : `<label class="btn btn-sm" style="cursor:pointer">
+               <i class="ti ti-upload"></i> Upload
+               <input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="handleValUpload(${i}, this)">
+             </label>`
+        }
       </div>
     </div>`;
   }).join('');
 }
+
+function handleValUpload(i, input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  // Show validating spinner
+  document.getElementById(`vstatus-${i}`).innerHTML =
+    `<span style="font-size:12px;color:var(--txm);display:flex;align-items:center;gap:6px"><div class="dot-loader"><span></span><span></span><span></span></div> Validating...</span>`;
+
+  setTimeout(() => {
+    valUploads[i] = { name: file.name };
+    renderValidator();
+  }, 1500);
+}
+
+function handleFiles(files) { /* legacy — no longer used */ }
+function handleDrop(e) { e.preventDefault(); }
 
 function submitBid() {
   document.getElementById('success-modal').classList.add('show');
@@ -389,3 +428,4 @@ renderDash();
 renderChecklist();
 renderDigi();
 renderAlerts();
+renderValidator();
