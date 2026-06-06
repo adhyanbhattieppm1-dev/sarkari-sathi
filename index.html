@@ -284,17 +284,29 @@
   <!-- VALIDATOR -->
   <div class="page" id="page-validator">
     <div class="sec"><h2>Document validator</h2><span class="badge b-nv">Auto-check</span></div>
-    <div class="card" style="margin-bottom:12px">
-      <div class="uz" id="dropzone" onclick="document.getElementById('finput').click()" ondragover="event.preventDefault()" ondrop="handleDrop(event)">
-        <i class="ti ti-upload uz-icon"></i>
-        <p><strong>Click to upload</strong> or drag & drop</p>
-        <p class="uz-sub">PDF, JPG, PNG · max 5 MB each</p>
-      </div>
-      <input type="file" id="finput" multiple accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="handleFiles(this.files)">
+
+    <!-- No scan state -->
+    <div id="val-no-scan" style="display:none">
+      <div class="al al-info"><i class="ti ti-info-circle"></i><span>Please <strong>scan a tender first</strong> from the Scanner tab to load your document requirements here.</span></div>
+      <button class="btn btn-nv" onclick="go('scanner')"><i class="ti ti-scan"></i> Go to Scanner</button>
     </div>
-    <div id="val-result" style="display:none">
-      <div class="sec"><h2>Validation results</h2></div>
-      <div class="card"><div id="val-list"></div></div>
+
+    <!-- Requirements list state -->
+    <div id="val-main" style="display:none">
+      <!-- Progress summary -->
+      <div class="card" style="margin-bottom:12px">
+        <div class="prog-header">
+          <span style="font-size:13px;font-weight:500">Upload progress</span>
+          <span id="val-count" style="font-size:13px;color:var(--txm)">0 of 0 uploaded</span>
+        </div>
+        <div class="pb"><div class="pbf" id="val-bar" style="width:0%"></div></div>
+      </div>
+
+      <!-- Document rows -->
+      <div class="card">
+        <div id="val-rows"></div>
+      </div>
+
       <div class="btn-row" style="margin-top:12px">
         <button class="btn btn-gn" onclick="submitBid()"><i class="ti ti-send"></i> Submit bid package</button>
         <button class="btn" onclick="go('advisor')"><i class="ti ti-robot"></i> AI review</button>
