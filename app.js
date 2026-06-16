@@ -291,6 +291,10 @@ document.addEventListener('click', function(e) {
 });
 
 
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let chatHistory = [];
+let scannedRequirements = null;
+
 // ── NAVIGATION ────────────────────────────────────────────────────────────────
 function go(p) {
   document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
