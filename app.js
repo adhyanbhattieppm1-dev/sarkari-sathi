@@ -252,8 +252,11 @@ function setLang(lang) {
 
   // Update hero
   const heroH = document.querySelector('.hero h1');
-  const userName = document.getElementById('dash-name')?.textContent || '';
-  if (heroH) heroH.textContent = t.heroTitle + (userName ? ', ' + userName : '') + '!';
+  if (heroH) {
+    const nameSpan = document.getElementById('dash-name');
+    const userName = nameSpan ? nameSpan.textContent : '';
+    heroH.innerHTML = t.heroTitle + (userName ? ', <span id="dash-name">' + userName + '</span>' : '') + '!';
+  }
   const heroP = document.querySelector('.hero p');
   if (heroP) heroP.textContent = t.heroSub;
 
