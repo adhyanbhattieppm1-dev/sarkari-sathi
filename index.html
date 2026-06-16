@@ -134,6 +134,11 @@
       cursor: pointer;
     }
     .signout-btn:hover { background: var(--bg); }
+    .lang-btn { background: rgba(255,255,255,0.12); border: 0.5px solid rgba(255,255,255,0.25); color: #fff; font-size: 12px; padding: 4px 10px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: 'DM Sans', sans-serif; }
+    .lang-menu { position: absolute; top: 38px; right: 0; background: #fff; border: 0.5px solid var(--bd); border-radius: 8px; padding: 5px; width: 155px; z-index: 999; box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+    .lang-item { padding: 7px 10px; font-size: 13px; border-radius: 5px; cursor: pointer; display: flex; justify-content: space-between; color: var(--tx); font-family: 'DM Sans', sans-serif; }
+    .lang-item:hover { background: var(--bg); }
+    .lang-check { color: var(--gn); font-weight: 600; font-size: 13px; }
   </style>
 </head>
 <body>
@@ -188,6 +193,25 @@
     <button class="ntab" onclick="go('digilocker')"><i class="ti ti-lock"></i> DigiLocker</button>
     <button class="ntab" onclick="go('alerts')"><i class="ti ti-bell"></i> Alerts</button>
     <button class="ntab" onclick="go('advisor')"><i class="ti ti-robot"></i> AI Advisor</button>
+  </div>
+  <div class="lang-sel" style="position:relative">
+    <button class="lang-btn" onclick="toggleLangMenu()" id="lang-btn">
+      <i class="ti ti-language" style="font-size:14px"></i>
+      <span id="lang-label">EN</span>
+      <i class="ti ti-chevron-down" style="font-size:11px"></i>
+    </button>
+    <div class="lang-menu" id="lang-menu" style="display:none">
+      <div class="lang-item" onclick="setLang('en')">English <span class="lang-check" id="lc-en">✓</span></div>
+      <div class="lang-item" onclick="setLang('hi')">हिंदी <span class="lang-check" id="lc-hi"></span></div>
+      <div class="lang-item" onclick="setLang('pa')">ਪੰਜਾਬੀ <span class="lang-check" id="lc-pa"></span></div>
+      <div class="lang-item" onclick="setLang('mr')">मराठी <span class="lang-check" id="lc-mr"></span></div>
+      <div class="lang-item" onclick="setLang('gu')">ગુજરાતી <span class="lang-check" id="lc-gu"></span></div>
+      <div class="lang-item" onclick="setLang('ta')">தமிழ் <span class="lang-check" id="lc-ta"></span></div>
+      <div class="lang-item" onclick="setLang('te')">తెలుగు <span class="lang-check" id="lc-te"></span></div>
+      <div class="lang-item" onclick="setLang('kn')">ಕನ್ನಡ <span class="lang-check" id="lc-kn"></span></div>
+      <div class="lang-item" onclick="setLang('bn')">বাংলা <span class="lang-check" id="lc-bn"></span></div>
+      <div class="lang-item" onclick="setLang('or')">ଓଡ଼ିଆ <span class="lang-check" id="lc-or"></span></div>
+    </div>
   </div>
   <div class="user-menu">
     <div class="user-avatar" id="user-initials">U</div>
