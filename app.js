@@ -53,9 +53,243 @@ const EMAIL_MESSAGES = {
   mr: { subject: 'तातडीची कारवाई: उद्यम प्रमाणपत्र 7 दिवसांत संपणार', body: `प्रिय राजेश कुमार,\n\nSarkariSathi कडून महत्त्वाची सूचना.\n\nतुमचे उद्यम नोंदणी प्रमाणपत्र 7 दिवसांत (15 जून 2026) संपणार आहे. कृपया त्वरित नूतनीकरण करा: udyamregistration.gov.in` },
 };
 
-// ── STATE ─────────────────────────────────────────────────────────────────────
-let chatHistory = [];
-let scannedRequirements = null; // stores requirements from last scan
+// ── LANGUAGE SYSTEM ───────────────────────────────────────────────────────────
+let currentLang = 'en';
+
+const LANG = {
+  en: {
+    label: 'EN',
+    nav: ['Dashboard','Scanner','Checklist','Validator','DigiLocker','Alerts','AI Advisor'],
+    heroTitle: 'Welcome back',
+    heroSub: 'Your GeM compliance dashboard',
+    dashStats: ['Active Tenders','Docs Expiring','Compliance Score','Bids Won'],
+    scanTitle: 'Tender Scanner',
+    scanBtn: 'Scan Tender',
+    checkTitle: 'Compliance Checklist',
+    valTitle: 'Document Validator',
+    valSub: 'Auto-check',
+    submitBtn: 'Submit bid package',
+    buildBtn: 'Build checklist',
+    signOut: 'Sign out',
+    uploadProgress: 'Upload progress',
+    scanPlaceholder: 'Paste GeM tender URL or upload PDF...',
+  },
+  hi: {
+    label: 'HI',
+    nav: ['डैशबोर्ड','स्कैनर','चेकलिस्ट','सत्यापक','डिजिलॉकर','अलर्ट','AI सलाहकार'],
+    heroTitle: 'वापस स्वागत है',
+    heroSub: 'आपका GeM अनुपालन डैशबोर्ड',
+    dashStats: ['सक्रिय निविदाएं','दस्तावेज़ समाप्ति','अनुपालन स्कोर','बोलियां जीती'],
+    scanTitle: 'निविदा स्कैनर',
+    scanBtn: 'स्कैन करें',
+    checkTitle: 'अनुपालन चेकलिस्ट',
+    valTitle: 'दस्तावेज़ सत्यापक',
+    valSub: 'स्वतः जाँच',
+    submitBtn: 'बोली पैकेज जमा करें',
+    buildBtn: 'चेकलिस्ट बनाएं',
+    signOut: 'साइन आउट',
+    uploadProgress: 'अपलोड प्रगति',
+    scanPlaceholder: 'GeM निविदा URL पेस्ट करें या PDF अपलोड करें...',
+  },
+  pa: {
+    label: 'PA',
+    nav: ['ਡੈਸ਼ਬੋਰਡ','ਸਕੈਨਰ','ਚੈਕਲਿਸਟ','ਵੈਲੀਡੇਟਰ','ਡਿਜੀਲਾਕਰ','ਅਲਰਟ','AI ਸਲਾਹਕਾਰ'],
+    heroTitle: 'ਵਾਪਸ ਸੁਆਗਤ ਹੈ',
+    heroSub: 'ਤੁਹਾਡਾ GeM ਪਾਲਣਾ ਡੈਸ਼ਬੋਰਡ',
+    dashStats: ['ਸਰਗਰਮ ਟੈਂਡਰ','ਦਸਤਾਵੇਜ਼ ਮਿਆਦ','ਪਾਲਣਾ ਸਕੋਰ','ਬੋਲੀਆਂ ਜਿੱਤੀਆਂ'],
+    scanTitle: 'ਟੈਂਡਰ ਸਕੈਨਰ',
+    scanBtn: 'ਸਕੈਨ ਕਰੋ',
+    checkTitle: 'ਪਾਲਣਾ ਚੈਕਲਿਸਟ',
+    valTitle: 'ਦਸਤਾਵੇਜ਼ ਵੈਲੀਡੇਟਰ',
+    valSub: 'ਆਟੋ-ਜਾਂਚ',
+    submitBtn: 'ਬੋਲੀ ਪੈਕੇਜ ਜਮ੍ਹਾਂ ਕਰੋ',
+    buildBtn: 'ਚੈਕਲਿਸਟ ਬਣਾਓ',
+    signOut: 'ਸਾਈਨ ਆਊਟ',
+    uploadProgress: 'ਅਪਲੋਡ ਪ੍ਰਗਤੀ',
+    scanPlaceholder: 'GeM ਟੈਂਡਰ URL ਪੇਸਟ ਕਰੋ ਜਾਂ PDF ਅਪਲੋਡ ਕਰੋ...',
+  },
+  mr: {
+    label: 'MR',
+    nav: ['डॅशबोर्ड','स्कॅनर','चेकलिस्ट','व्हॅलिडेटर','डिजीलॉकर','अलर्ट','AI सल्लागार'],
+    heroTitle: 'परत स्वागत आहे',
+    heroSub: 'तुमचे GeM अनुपालन डॅशबोर्ड',
+    dashStats: ['सक्रिय निविदा','कागदपत्रे कालबाह्य','अनुपालन स्कोर','बोली जिंकल्या'],
+    scanTitle: 'निविदा स्कॅनर',
+    scanBtn: 'स्कॅन करा',
+    checkTitle: 'अनुपालन चेकलिस्ट',
+    valTitle: 'कागदपत्र व्हॅलिडेटर',
+    valSub: 'स्वयं-तपासणी',
+    submitBtn: 'बोली पॅकेज सबमिट करा',
+    buildBtn: 'चेकलिस्ट तयार करा',
+    signOut: 'साइन आउट',
+    uploadProgress: 'अपलोड प्रगती',
+    scanPlaceholder: 'GeM निविदा URL पेस्ट करा किंवा PDF अपलोड करा...',
+  },
+  gu: {
+    label: 'GU',
+    nav: ['ડેશબોર્ડ','સ્કેનર','ચેકલિસ્ટ','વેલિડેટર','ડિજીલૉકર','એલર્ટ','AI સલાહકાર'],
+    heroTitle: 'પાછા સ્વાગત છે',
+    heroSub: 'તમારું GeM અનુપાલન ડેશબોર્ડ',
+    dashStats: ['સક્રિય ટેન્ડર','દસ્તાવેજ સમાપ્તિ','અનુપાલન સ્કોર','બોલી જીતી'],
+    scanTitle: 'ટેન્ડર સ્કેનર',
+    scanBtn: 'સ્કેન કરો',
+    checkTitle: 'અનુપાલન ચેકલિસ્ટ',
+    valTitle: 'દસ્તાવેજ વેલિડેટર',
+    valSub: 'સ્વતઃ-તપાસ',
+    submitBtn: 'બોલી પેકેજ સબમિટ કરો',
+    buildBtn: 'ચેકલિસ્ટ બનાવો',
+    signOut: 'સાઇન આઉટ',
+    uploadProgress: 'અપલોડ પ્રગતિ',
+    scanPlaceholder: 'GeM ટેન્ડર URL પેસ્ટ કરો અથવા PDF અપલોડ કરો...',
+  },
+  ta: {
+    label: 'TA',
+    nav: ['டாஷ்போர்டு','ஸ்கேனர்','சரிபார்ப்பு பட்டியல்','சரிபார்ப்பாளர்','டிஜிலாக்கர்','எச்சரிக்கைகள்','AI ஆலோசகர்'],
+    heroTitle: 'மீண்டும் வரவேற்கிறோம்',
+    heroSub: 'உங்கள் GeM இணக்க டாஷ்போர்டு',
+    dashStats: ['செயலில் உள்ள டெண்டர்கள்','ஆவணங்கள் காலாவதி','இணக்க மதிப்பெண்','வெற்றி பெற்ற ஏலங்கள்'],
+    scanTitle: 'டெண்டர் ஸ்கேனர்',
+    scanBtn: 'ஸ்கேன் செய்',
+    checkTitle: 'இணக்க சரிபார்ப்பு பட்டியல்',
+    valTitle: 'ஆவண சரிபார்ப்பாளர்',
+    valSub: 'தானியங்கி சரிபார்ப்பு',
+    submitBtn: 'ஏல தொகுப்பை சமர்ப்பி',
+    buildBtn: 'பட்டியலை உருவாக்கு',
+    signOut: 'வெளியேறு',
+    uploadProgress: 'பதிவேற்ற முன்னேற்றம்',
+    scanPlaceholder: 'GeM டெண்டர் URL ஒட்டவும் அல்லது PDF பதிவேற்றவும்...',
+  },
+  te: {
+    label: 'TE',
+    nav: ['డాష్‌బోర్డ్','స్కానర్','చెక్‌లిస్ట్','వాలిడేటర్','డిజిలాకర్','హెచ్చరికలు','AI సలహాదారు'],
+    heroTitle: 'తిరిగి స్వాగతం',
+    heroSub: 'మీ GeM సమ్మతి డాష్‌బోర్డ్',
+    dashStats: ['చురుకైన టెండర్లు','పత్రాల గడువు','సమ్మతి స్కోర్','గెలిచిన బిడ్లు'],
+    scanTitle: 'టెండర్ స్కానర్',
+    scanBtn: 'స్కాన్ చేయి',
+    checkTitle: 'సమ్మతి చెక్‌లిస్ట్',
+    valTitle: 'పత్రాల వాలిడేటర్',
+    valSub: 'స్వయంచాలక తనిఖీ',
+    submitBtn: 'బిడ్ ప్యాకేజీని సమర్పించు',
+    buildBtn: 'చెక్‌లిస్ట్ నిర్మించు',
+    signOut: 'సైన్ అవుట్',
+    uploadProgress: 'అప్‌లోడ్ పురోగతి',
+    scanPlaceholder: 'GeM టెండర్ URL అతికించండి లేదా PDF అప్‌లోడ్ చేయండి...',
+  },
+  kn: {
+    label: 'KN',
+    nav: ['ಡ್ಯಾಶ್‌ಬೋರ್ಡ್','ಸ್ಕ್ಯಾನರ್','ಚೆಕ್‌ಲಿಸ್ಟ್','ವ್ಯಾಲಿಡೇಟರ್','ಡಿಜಿಲಾಕರ್','ಎಚ್ಚರಿಕೆಗಳು','AI ಸಲಹೆಗಾರ'],
+    heroTitle: 'ಮತ್ತೆ ಸ್ವಾಗತ',
+    heroSub: 'ನಿಮ್ಮ GeM ಅನುಸರಣೆ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್',
+    dashStats: ['ಸಕ್ರಿಯ ಟೆಂಡರ್‌ಗಳು','ದಾಖಲೆಗಳ ಮುಕ್ತಾಯ','ಅನುಸರಣೆ ಸ್ಕೋರ್','ಗೆದ್ದ ಬಿಡ್‌ಗಳು'],
+    scanTitle: 'ಟೆಂಡರ್ ಸ್ಕ್ಯಾನರ್',
+    scanBtn: 'ಸ್ಕ್ಯಾನ್ ಮಾಡಿ',
+    checkTitle: 'ಅನುಸರಣೆ ಚೆಕ್‌ಲಿಸ್ಟ್',
+    valTitle: 'ದಾಖಲೆ ವ್ಯಾಲಿಡೇಟರ್',
+    valSub: 'ಸ್ವಯಂ-ಪರಿಶೀಲನೆ',
+    submitBtn: 'ಬಿಡ್ ಪ್ಯಾಕೇಜ್ ಸಲ್ಲಿಸಿ',
+    buildBtn: 'ಚೆಕ್‌ಲಿಸ್ಟ್ ನಿರ್ಮಿಸಿ',
+    signOut: 'ಸೈನ್ ಔಟ್',
+    uploadProgress: 'ಅಪ್‌ಲೋಡ್ ಪ್ರಗತಿ',
+    scanPlaceholder: 'GeM ಟೆಂಡರ್ URL ಅಂಟಿಸಿ ಅಥವಾ PDF ಅಪ್‌ಲೋಡ್ ಮಾಡಿ...',
+  },
+  bn: {
+    label: 'BN',
+    nav: ['ড্যাশবোর্ড','স্ক্যানার','চেকলিস্ট','যাচাইকারী','ডিজিলকার','সতর্কতা','AI উপদেষ্টা'],
+    heroTitle: 'আবার স্বাগতম',
+    heroSub: 'আপনার GeM সম্মতি ড্যাশবোর্ড',
+    dashStats: ['সক্রিয় টেন্ডার','নথি মেয়াদোত্তীর্ণ','সম্মতি স্কোর','জেতা বিড'],
+    scanTitle: 'টেন্ডার স্ক্যানার',
+    scanBtn: 'স্ক্যান করুন',
+    checkTitle: 'সম্মতি চেকলিস্ট',
+    valTitle: 'নথি যাচাইকারী',
+    valSub: 'স্বয়ংক্রিয় যাচাই',
+    submitBtn: 'বিড প্যাকেজ জমা দিন',
+    buildBtn: 'চেকলিস্ট তৈরি করুন',
+    signOut: 'সাইন আউট',
+    uploadProgress: 'আপলোড অগ্রগতি',
+    scanPlaceholder: 'GeM টেন্ডার URL পেস্ট করুন বা PDF আপলোড করুন...',
+  },
+  or: {
+    label: 'OR',
+    nav: ['ଡ୍ୟାଶବୋର୍ଡ','ସ୍କ୍ୟାନର','ଚେକଲିଷ୍ଟ','ଭ୍ୟାଲିଡେଟର','ଡିଜିଲକର','ସତର୍କତା','AI ପରାମର୍ଶଦାତା'],
+    heroTitle: 'ପୁନଃ ସ୍ୱାଗତ',
+    heroSub: 'ଆପଣଙ୍କ GeM ଅନୁପାଳନ ଡ୍ୟାଶବୋର୍ଡ',
+    dashStats: ['ସକ୍ରିୟ ଟେଣ୍ଡର','ଦସ୍ତାବେଜ ସମାପ୍ତି','ଅନୁପାଳନ ସ୍କୋର','ଜିତିଥିବା ବିଡ'],
+    scanTitle: 'ଟେଣ୍ଡର ସ୍କ୍ୟାନର',
+    scanBtn: 'ସ୍କ୍ୟାନ କରନ୍ତୁ',
+    checkTitle: 'ଅନୁପାଳନ ଚେକଲିଷ୍ଟ',
+    valTitle: 'ଦସ୍ତାବେଜ ଭ୍ୟାଲିଡେଟର',
+    valSub: 'ସ୍ୱତଃ-ଯାଞ୍ଚ',
+    submitBtn: 'ବିଡ ପ୍ୟାକେଜ ଦାଖଲ କରନ୍ତୁ',
+    buildBtn: 'ଚେକଲିଷ୍ଟ ତିଆରି କରନ୍ତୁ',
+    signOut: 'ସାଇନ ଆଉଟ',
+    uploadProgress: 'ଅପଲୋଡ ଅଗ୍ରଗତି',
+    scanPlaceholder: 'GeM ଟେଣ୍ଡର URL ପେଷ୍ଟ କରନ୍ତୁ ବା PDF ଅପଲୋଡ କରନ୍ତୁ...',
+  },
+};
+
+function toggleLangMenu() {
+  const m = document.getElementById('lang-menu');
+  m.style.display = m.style.display === 'none' ? 'block' : 'none';
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  const t = LANG[lang];
+
+  // Update dropdown label
+  document.getElementById('lang-label').textContent = t.label;
+
+  // Update checkmarks
+  ['en','hi','pa','mr','gu','ta','te','kn','bn','or'].forEach(l => {
+    document.getElementById('lc-' + l).textContent = l === lang ? '✓' : '';
+  });
+
+  // Update nav tabs
+  const tabs = document.querySelectorAll('.ntab');
+  t.nav.forEach((label, i) => { if (tabs[i]) tabs[i].innerHTML = tabs[i].innerHTML.replace(/>[^<]+$/, '>' + label); });
+
+  // Update hero
+  const heroH = document.querySelector('.hero h1');
+  if (heroH) heroH.textContent = t.heroTitle + ', ' + (document.getElementById('dash-name')?.textContent || '');
+  const heroP = document.querySelector('.hero p');
+  if (heroP) heroP.textContent = t.heroSub;
+
+  // Update scanner
+  const scanH = document.querySelector('#page-scanner .sec h2');
+  if (scanH) scanH.textContent = t.scanTitle;
+  const scanInp = document.getElementById('scan-url');
+  if (scanInp) scanInp.placeholder = t.scanPlaceholder;
+  const scanBtn = document.getElementById('scan-btn');
+  if (scanBtn) scanBtn.innerHTML = `<i class="ti ti-scan"></i> ${t.scanBtn}`;
+
+  // Update checklist
+  const clH = document.querySelector('#page-checklist .sec h2');
+  if (clH) clH.textContent = t.checkTitle;
+
+  // Update validator
+  const valH = document.querySelector('#page-validator .sec h2');
+  if (valH) valH.textContent = t.valTitle;
+  const valBadge = document.querySelector('#page-validator .badge');
+  if (valBadge) valBadge.textContent = t.valSub;
+  const valProg = document.querySelector('#page-validator .prog-header span');
+  if (valProg) valProg.textContent = t.uploadProgress;
+  const submitBtn = document.querySelector('#page-validator .btn-gn');
+  if (submitBtn) submitBtn.innerHTML = `<i class="ti ti-send"></i> ${t.submitBtn}`;
+
+  // Close menu
+  document.getElementById('lang-menu').style.display = 'none';
+}
+
+// Close lang menu when clicking outside
+document.addEventListener('click', function(e) {
+  const sel = document.querySelector('.lang-sel');
+  if (sel && !sel.contains(e.target)) {
+    document.getElementById('lang-menu').style.display = 'none';
+  }
+});
+
 
 // ── NAVIGATION ────────────────────────────────────────────────────────────────
 function go(p) {
