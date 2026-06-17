@@ -664,8 +664,10 @@ async function sendChat() {
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
-renderDash();
-renderChecklist();
-renderDigi();
-renderAlerts();
-renderValidator();
+document.addEventListener('DOMContentLoaded', () => {
+  renderDash();
+  renderChecklist();
+  renderDigi();
+  renderAlerts();
+  renderValidator();
+});
