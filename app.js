@@ -262,7 +262,7 @@ function setLang(lang) {
   if (signOutBtn) signOutBtn.innerHTML = `<i class="ti ti-logout"></i> ${t.signOut}`;
 
   // Re-render dashboard with new language
-  renderDash();
+  if (typeof renderDash === 'function') renderDash();
 
   // Close dropdown
   document.getElementById('lang-menu').style.display = 'none';
@@ -301,9 +301,11 @@ function toggleMenu() {
 
 // ── DASHBOARD ─────────────────────────────────────────────────────────────────
 function renderDash() {
-  const t = LANG[currentLang] || LANG['en'];
-  const statusLabels = t.statusLabels || { 'In progress': 'In progress', 'Ready': 'Ready', 'Incomplete': 'Incomplete' };
-  document.getElementById('dash-tenders').innerHTML = TENDERS.map(tender => `
+  const lang = LANG[currentLang] || LANG['en'];
+  const statusLabels = lang.statusLabels || { 'In progress': 'In progress', 'Ready': 'Ready', 'Incomplete': 'Incomplete' };
+  const container = document.getElementById('dash-tenders');
+  if (!container) return;
+  container.innerHTML = TENDERS.map(tender => `
     <div class="tender-card">
       <div class="tender-card-top">
         <div>
@@ -314,14 +316,14 @@ function renderDash() {
       </div>
       <div style="margin-bottom:10px">
         <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--txm);margin-bottom:3px">
-          <span>${t.compliance || 'Compliance'}</span><span>${tender.comp}%</span>
+          <span>${lang.compliance || 'Compliance'}</span><span>${tender.comp}%</span>
         </div>
         <div class="pb"><div class="pbf ${tender.comp < 50 ? 'or' : ''}" style="width:${tender.comp}%"></div></div>
       </div>
       <div class="btn-row">
-        <button class="btn btn-sm" onclick="go('checklist')"><i class="ti ti-checklist"></i> ${t.checklist || 'Checklist'}</button>
-        <button class="btn btn-sm" onclick="go('validator')"><i class="ti ti-files"></i> ${t.documents || 'Documents'}</button>
-        <button class="btn btn-sm" onclick="go('advisor')"><i class="ti ti-robot"></i> ${t.aiHelp || 'AI help'}</button>
+        <button class="btn btn-sm" onclick="go('checklist')"><i class="ti ti-checklist"></i> ${lang.checklist || 'Checklist'}</button>
+        <button class="btn btn-sm" onclick="go('validator')"><i class="ti ti-files"></i> ${lang.documents || 'Documents'}</button>
+        <button class="btn btn-sm" onclick="go('advisor')"><i class="ti ti-robot"></i> ${lang.aiHelp || 'AI help'}</button>
       </div>
     </div>`).join('');
 }
