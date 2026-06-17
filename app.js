@@ -50,6 +50,64 @@ const EMAIL_MESSAGES = {
   en: { subject: 'Action Required: Udyam Certificate Expiring in 7 Days', body: `Dear Rajesh Kumar,\n\nThis is an important reminder from SarkariSathi.\n\nYour Udyam Registration Certificate is expiring in 7 days (Jun 15, 2026). Without a valid Udyam certificate, you will be unable to submit bids on the Government e-Marketplace (GeM).\n\nAction required:\n1. Visit the Udyam portal: udyamregistration.gov.in\n2. Renew your certificate\n3. Upload the renewed certificate to your SarkariSathi vault\n\nBid opportunities currently active: 4\nTotal bid value at risk: ₹7,25,000\n\nLogin to your dashboard to take action.\n\nRegards,\nSarkariSathi Compliance Team` },
   hi: { subject: 'तत्काल कार्रवाई: उद्यम प्रमाणपत्र 7 दिनों में समाप्त हो रहा है', body: `प्रिय राजेश कुमार,\n\nSarkariSathi की ओर से महत्वपूर्ण सूचना।\n\nआपका उद्यम पंजीकरण प्रमाणपत्र 7 दिनों में (15 जून 2026) समाप्त हो रहा है। वैध उद्यम प्रमाणपत्र के बिना आप GeM पर बोलियां नहीं लगा पाएंगे।\n\nकृपया तुरंत नवीनीकरण करें: udyamregistration.gov.in\n\nSarkariSathi अनुपालन टीम` },
   pa: { subject: 'ਤੁਰੰਤ ਕਾਰਵਾਈ: ਉਦਯਮ ਸਰਟੀਫਿਕੇਟ 7 ਦਿਨਾਂ ਵਿੱਚ ਖਤਮ ਹੋ ਰਿਹਾ ਹੈ', body: `ਪਿਆਰੇ ਰਾਜੇਸ਼ ਕੁਮਾਰ,\n\nSarkariSathi ਵੱਲੋਂ ਮਹੱਤਵਪੂਰਨ ਸੂਚਨਾ।\n\nਤੁਹਾਡਾ ਉਦਯਮ ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਸਰਟੀਫਿਕੇਟ 7 ਦਿਨਾਂ ਵਿੱਚ ਖਤਮ ਹੋ ਰਿਹਾ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਨਵਿਆਓ: udyamregistration.gov.in` },
+  mr: { subject: 'तातडीची कारवाई: उद्यम प्रमाणपत्र 7 दिवसांत संपणार', body: `प्रिय राजेश कुमार,\n\nSarkariSathi कडून महत्त्वाची सूचना.\n\nतुमचे उद्यम नोंदणी प्रमाणपत्र 7 दिवसांत (15 जून 2026) संपणार आहे. कृपया त्वरित नूतनीकरण करा: udyamregistration.gov.in` },
+};
+
+// ── LANGUAGE SYSTEM ───────────────────────────────────────────────────────────
+let currentLang = 'en';
+
+const LANG = {
+  en: {
+    label: 'EN',
+    nav: ['Dashboard','Scanner','Checklist','Validator','DigiLocker','Alerts','AI Advisor'],
+    heroTitle: 'Welcome back', heroSub: 'Your GeM compliance dashboard',
+    dashStats: ['Active Tenders','Docs Expiring','Compliance Score','Bids Won'],
+    scanTitle: 'Tender Scanner', scanBtn: 'Scan Tender', checkTitle: 'Compliance Checklist',
+    valTitle: 'Document Validator', valSub: 'Auto-check', submitBtn: 'Submit bid package',
+    buildBtn: 'Build checklist', signOut: 'Sign out', uploadProgress: 'Upload progress',
+    scanPlaceholder: 'Paste GeM tender URL or upload PDF...',
+    activeTenders: 'Active tenders', open: 'open', compliance: 'Compliance',
+    checklist: 'Checklist', documents: 'Documents', aiHelp: 'AI help',
+    statLabels: ['Docs uploaded','Expiring in 30d','Bids submitted','AI Advisor'],
+    actionAlert: 'Action needed: Udyam Registration Certificate expires Jun 15, 2026. Open DigiLocker to renew it.',
+    aiTip: 'AI Tip: Tender GEM-2026-B-4829201 needs a BIS quality certificate.',
+    askAdvisor: 'Ask the advisor',
+    statusLabels: { 'In progress': 'In progress', 'Ready': 'Ready', 'Incomplete': 'Incomplete' },
+  },
+  hi: {
+    label: 'HI',
+    nav: ['डैशबोर्ड','स्कैनर','चेकलिस्ट','सत्यापक','डिजिलॉकर','अलर्ट','AI सलाहकार'],
+    heroTitle: 'वापस स्वागत है', heroSub: 'आपका GeM अनुपालन डैशबोर्ड',
+    dashStats: ['सक्रिय निविदाएं','दस्तावेज़ समाप्ति','अनुपालन स्कोर','बोलियां जीती'],
+    scanTitle: 'निविदा स्कैनर', scanBtn: 'स्कैन करें', checkTitle: 'अनुपालन चेकलिस्ट',
+    valTitle: 'दस्तावेज़ सत्यापक', valSub: 'स्वतः जाँच', submitBtn: 'बोली पैकेज जमा करें',
+    buildBtn: 'चेकलिस्ट बनाएं', signOut: 'साइन आउट', uploadProgress: 'अपलोड प्रगति',
+    scanPlaceholder: 'GeM निविदा URL पेस्ट करें या PDF अपलोड करें...',
+    activeTenders: 'सक्रिय निविदाएं', open: 'खुली', compliance: 'अनुपालन',
+    checklist: 'चेकलिस्ट', documents: 'दस्तावेज़', aiHelp: 'AI सहायता',
+    statLabels: ['दस्तावेज़ अपलोड','30 दिन में समाप्त','बोलियां जमा','AI सलाहकार'],
+    actionAlert: 'कार्रवाई आवश्यक: उद्यम पंजीकरण प्रमाणपत्र 15 जून 2026 को समाप्त होगा।',
+    aiTip: 'AI सुझाव: निविदा GEM-2026-B-4829201 के लिए BIS गुणवत्ता प्रमाणपत्र आवश्यक है।',
+    askAdvisor: 'सलाहकार से पूछें',
+    statusLabels: { 'In progress': 'जारी है', 'Ready': 'तैयार', 'Incomplete': 'अधूरा' },
+  },
+  pa: {
+    label: 'PA',
+    nav: ['ਡੈਸ਼ਬੋਰਡ','ਸਕੈਨਰ','ਚੈਕਲਿਸਟ','ਵੈਲੀਡੇਟਰ','ਡਿਜੀਲਾਕਰ','ਅਲਰਟ','AI ਸਲਾਹਕਾਰ'],
+    heroTitle: 'ਵਾਪਸ ਸੁਆਗਤ ਹੈ', heroSub: 'ਤੁਹਾਡਾ GeM ਪਾਲਣਾ ਡੈਸ਼ਬੋਰਡ',
+    dashStats: ['ਸਰਗਰਮ ਟੈਂਡਰ','ਦਸਤਾਵੇਜ਼ ਮਿਆਦ','ਪਾਲਣਾ ਸਕੋਰ','ਬੋਲੀਆਂ ਜਿੱਤੀਆਂ'],
+    scanTitle: 'ਟੈਂਡਰ ਸਕੈਨਰ', scanBtn: 'ਸਕੈਨ ਕਰੋ', checkTitle: 'ਪਾਲਣਾ ਚੈਕਲਿਸਟ',
+    valTitle: 'ਦਸਤਾਵੇਜ਼ ਵੈਲੀਡੇਟਰ', valSub: 'ਆਟੋ-ਜਾਂਚ', submitBtn: 'ਬੋਲੀ ਪੈਕੇਜ ਜਮ੍ਹਾਂ ਕਰੋ',
+    buildBtn: 'ਚੈਕਲਿਸਟ ਬਣਾਓ', signOut: 'ਸਾਈਨ ਆਊਟ', uploadProgress: 'ਅਪਲੋਡ ਪ੍ਰਗਤੀ',
+    scanPlaceholder: 'GeM ਟੈਂਡਰ URL ਪੇਸਟ ਕਰੋ ਜਾਂ PDF ਅਪਲੋਡ ਕਰੋ...',
+    activeTenders: 'ਸਰਗਰਮ ਟੈਂਡਰ', open: 'ਖੁੱਲੇ', compliance: 'ਪਾਲਣਾ',
+    checklist: 'ਚੈਕਲਿਸਟ', documents: 'ਦਸਤਾਵੇਜ਼', aiHelp: 'AI ਮਦਦ',
+    statLabels: ['ਦਸਤਾਵੇਜ਼ ਅਪਲੋਡ','30 ਦਿਨਾਂ ਵਿੱਚ ਸਮਾਪਤ','ਬੋਲੀਆਂ ਜਮ੍ਹਾਂ','AI ਸਲਾਹਕਾਰ'],
+    actionAlert: 'ਕਾਰਵਾਈ ਲੋੜੀਂਦੀ: ਉਦਯਮ ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਸਰਟੀਫਿਕੇਟ 15 ਜੂਨ 2026 ਨੂੰ ਖਤਮ ਹੋਵੇਗਾ।',
+    aiTip: 'AI ਸੁਝਾਅ: ਟੈਂਡਰ GEM-2026-B-4829201 ਲਈ BIS ਗੁਣਵੱਤਾ ਸਰਟੀਫਿਕੇਟ ਚਾਹੀਦਾ ਹੈ।',
+    askAdvisor: 'ਸਲਾਹਕਾਰ ਤੋਂ ਪੁੱਛੋ',
+    statusLabels: { 'In progress': 'ਜਾਰੀ ਹੈ', 'Ready': 'ਤਿਆਰ', 'Incomplete': 'ਅਧੂਰਾ' },
+  },
   mr: {
     label: 'MR',
     nav: ['डॅशबोर्ड','स्कॅनर','चेकलिस्ट','व्हॅलिडेटर','डिजीलॉकर','अलर्ट','AI सल्लागार'],
@@ -65,7 +123,7 @@ const EMAIL_MESSAGES = {
     actionAlert: 'कारवाई आवश्यक: उद्यम नोंदणी प्रमाणपत्र 15 जून 2026 रोजी कालबाह्य होईल.',
     aiTip: 'AI सूचना: निविदा GEM-2026-B-4829201 साठी BIS गुणवत्ता प्रमाणपत्र आवश्यक आहे.',
     askAdvisor: 'सल्लागाराला विचारा',
-    statusLabels: { 'In progress': 'प्रगतीत', 'Ready': 'तैयार', 'Incomplete': 'अपूर्ण' },
+    statusLabels: { 'In progress': 'प्रगतीत', 'Ready': 'तयार', 'Incomplete': 'अपूर्ण' },
   },
   gu: {
     label: 'GU',
@@ -82,7 +140,7 @@ const EMAIL_MESSAGES = {
     actionAlert: 'કાર્યવાહી જરૂરી: ઉદ્યમ નોંધણી પ્રમાણપત્ર 15 જૂન 2026ના રોજ સમાપ્ત થશે.',
     aiTip: 'AI સૂચન: ટેન્ડર GEM-2026-B-4829201 માટે BIS ગુણવત્તા પ્રમાણપત્ર જોઈએ.',
     askAdvisor: 'સલાહકારને પૂછો',
-    statusLabels: { 'In progress': 'ચાલુ છે', 'Ready': 'તૈयार', 'Incomplete': 'અધૂρύ' },
+    statusLabels: { 'In progress': 'ચાલુ છે', 'Ready': 'તૈયાર', 'Incomplete': 'અધૂરું' },
   },
   ta: {
     label: 'TA',
@@ -180,19 +238,14 @@ function setLang(lang) {
   currentLang = lang;
   const t = LANG[lang];
 
-  // Update dropdown label
   document.getElementById('lang-label').textContent = t.label;
-
-  // Update checkmarks
   ['en','hi','pa','mr','gu','ta','te','kn','bn','or'].forEach(l => {
     document.getElementById('lc-' + l).textContent = l === lang ? '✓' : '';
   });
 
-  // Update nav tabs
   const tabs = document.querySelectorAll('.ntab');
   t.nav.forEach((label, i) => { if (tabs[i]) tabs[i].innerHTML = tabs[i].innerHTML.replace(/>[^<]+$/, '>' + label); });
 
-  // Update hero
   const heroH = document.querySelector('.hero h1');
   if (heroH) {
     const nameSpan = document.getElementById('dash-name');
@@ -202,7 +255,6 @@ function setLang(lang) {
   const heroP = document.querySelector('.hero p');
   if (heroP) heroP.textContent = t.heroSub;
 
-  // Update scanner
   const scanH = document.querySelector('#page-scanner .sec h2');
   if (scanH) scanH.textContent = t.scanTitle;
   const scanInp = document.getElementById('scan-url');
@@ -210,11 +262,9 @@ function setLang(lang) {
   const scanBtn = document.getElementById('scan-btn');
   if (scanBtn) scanBtn.innerHTML = `<i class="ti ti-scan"></i> ${t.scanBtn}`;
 
-  // Update checklist
   const clH = document.querySelector('#page-checklist .sec h2');
   if (clH) clH.textContent = t.checkTitle;
 
-  // Update validator
   const valH = document.querySelector('#page-validator .sec h2');
   if (valH) valH.textContent = t.valTitle;
   const valBadge = document.querySelector('#page-validator .badge');
@@ -224,58 +274,27 @@ function setLang(lang) {
   const submitBtn = document.querySelector('#page-validator .btn-gn');
   if (submitBtn) submitBtn.innerHTML = `<i class="ti ti-send"></i> ${t.submitBtn}`;
 
-  // Update dashboard
-  const activeTendersH = document.querySelector('#page-dash .sec h2');
-  if (activeTendersH) activeTendersH.textContent = t.activeTenders || 'Active tenders';
-  const openBadge = document.querySelector('#page-dash .sec .badge');
-  if (openBadge) openBadge.textContent = `4 ${t.open || 'open'}`;
-
-  // Update stat card labels
   const statLabels = document.querySelectorAll('#page-dash .sc-l');
   if (t.statLabels) t.statLabels.forEach((label, i) => { if (statLabels[i]) statLabels[i].textContent = label; });
 
-  // Update action alert and AI tip
   const actionEl = document.querySelector('#page-dash .al-warn span');
   if (actionEl && t.actionAlert) actionEl.textContent = t.actionAlert;
   const aiTipEl = document.querySelector('#page-dash .al-info');
   if (aiTipEl && t.aiTip) aiTipEl.innerHTML = `<i class="ti ti-bulb"></i><span>${t.aiTip} <a href="#" onclick="go('advisor')">${t.askAdvisor || 'Ask the advisor'}</a> how to get one fast.</span>`;
 
-  // Update tender card buttons and status badges
-  const tenderCards = document.querySelectorAll('.tender-card');
-  tenderCards.forEach(card => {
-    const btns = card.querySelectorAll('.btn');
-    if (btns[0]) btns[0].innerHTML = `<i class="ti ti-checklist"></i> ${t.checklist || 'Checklist'}`;
-    if (btns[1]) btns[1].innerHTML = `<i class="ti ti-files"></i> ${t.documents || 'Documents'}`;
-    if (btns[2]) btns[2].innerHTML = `<i class="ti ti-robot"></i> ${t.aiHelp || 'AI help'}`;
-    const badge = card.querySelector('.badge');
-    if (badge && t.statusLabels) {
-      const currentStatus = Object.keys(t.statusLabels).find(k => badge.textContent.trim() === (LANG['en'].statusLabels[k] || k));
-      const matchedStatus = currentStatus || Object.keys(t.statusLabels).find(k => Object.values(LANG).some(l => l.statusLabels && l.statusLabels[k] === badge.textContent.trim()));
-      if (matchedStatus) badge.textContent = t.statusLabels[matchedStatus];
-    }
-    const compLabel = card.querySelector('span');
-    if (compLabel && compLabel.textContent === 'Compliance') compLabel.textContent = t.compliance || 'Compliance';
-  });
-
-  // Update sign out button
   const signOutBtn = document.querySelector('.signout-btn');
   if (signOutBtn) signOutBtn.innerHTML = `<i class="ti ti-logout"></i> ${t.signOut}`;
 
-  // Re-render dashboard with new language
-  if (typeof renderDash === 'function') renderDash();
-
-  // Close dropdown
+  renderDash();
   document.getElementById('lang-menu').style.display = 'none';
 }
 
-// Close lang menu when clicking outside
 document.addEventListener('click', function(e) {
   const sel = document.querySelector('.lang-sel');
   if (sel && !sel.contains(e.target)) {
     document.getElementById('lang-menu').style.display = 'none';
   }
 });
-
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
 let chatHistory = [];
@@ -290,7 +309,6 @@ function go(p) {
   const i = ps.indexOf(p);
   if (i >= 0) document.querySelectorAll('.ntab')[i].classList.add('active');
   if (p === 'validator') renderValidator();
-  // close mobile menu
   document.getElementById('ntabs').classList.remove('open');
   window.scrollTo(0, 0);
 }
@@ -333,30 +351,23 @@ async function runScan() {
   const url = document.getElementById('gem-url').value.trim();
   const fileInput = document.getElementById('scan-file');
   const file = fileInput && fileInput.files[0];
-
   if (!url && !file) { alert('Please enter a GeM tender URL or upload a file.'); return; }
-
   const bar = document.getElementById('scan-bar');
   const res = document.getElementById('scan-result');
   res.style.display = 'none';
   bar.classList.add('show');
-
   const msgs = ['Reading document...', 'Applying OCR...', 'AI extracting requirements...', 'Parsing details...'];
   let i = 0;
   const iv = setInterval(() => {
     document.getElementById('scan-status').textContent = msgs[Math.min(i, msgs.length-1)];
     i++;
   }, 700);
-
   try {
     let body = { url: url || '' };
-
     if (file) {
       const isPDF = file.type === 'application/pdf' || file.name.endsWith('.pdf');
       const isImage = file.type.startsWith('image/');
-
       if (isPDF || isImage) {
-        // Send as base64 for native Gemini understanding
         const base64 = await new Promise((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = e => resolve(e.target.result.split(',')[1]);
@@ -365,7 +376,6 @@ async function runScan() {
         });
         body = { fileBase64: base64, fileType: file.type || 'application/pdf' };
       } else {
-        // Word/text files - read as text
         const text = await new Promise((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = e => resolve(e.target.result);
@@ -375,7 +385,6 @@ async function runScan() {
         body = { fileText: text };
       }
     }
-
     const response = await fetch('/api/scan', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -384,9 +393,7 @@ async function runScan() {
     const data = await response.json();
     clearInterval(iv);
     bar.classList.remove('show');
-
     if (data.error) { alert('Scan failed: ' + data.error); return; }
-
     document.getElementById('scan-meta').innerHTML = [
       { l: 'Tender ID', v: data.tenderId || (url ? url.split('/').pop() : 'From file') },
       { l: 'Category', v: data.category || 'Not specified' },
@@ -395,16 +402,13 @@ async function runScan() {
       { l: 'Buyer', v: data.buyer || 'Not specified' },
       { l: 'MSE quota', v: data.mseQuota || 'Not specified' },
     ].map(f => `<div class="meta-field"><div class="mf-l">${f.l}</div><div class="mf-v">${f.v}</div></div>`).join('');
-
     const reqs = data.requirements || OCR_REQS;
-    scannedRequirements = reqs; // save for checklist
-
+    scannedRequirements = reqs;
     document.getElementById('ocr-reqs').innerHTML = reqs.map(r => `
       <div class="req-row">
         <i class="ti ti-file-text" style="font-size:15px;color:var(--nv-m);flex-shrink:0"></i>
         <span>${r}</span>
       </div>`).join('');
-
     res.style.display = 'block';
   } catch (err) {
     clearInterval(iv);
@@ -413,15 +417,12 @@ async function runScan() {
   }
 }
 
-
 // ── CHECKLIST ─────────────────────────────────────────────────────────────────
-
-// Maps requirement text to a tag category
 function inferTag(name) {
   const n = name.toLowerCase();
-  if (n.includes('udyam') || n.includes('msme') || n.includes('pan') || n.includes('aadhaar') || n.includes('identity')) return 'Identity';
+  if (n.includes('udyam') || n.includes('msme') || n.includes('pan') || n.includes('aadhaar')) return 'Identity';
   if (n.includes('gst') || n.includes('tax') || n.includes('itr') || n.includes('income')) return 'Tax';
-  if (n.includes('bank') || n.includes('cheque') || n.includes('guarantee') || n.includes('emd') || n.includes('security deposit') || n.includes('cpbg')) return 'Finance';
+  if (n.includes('bank') || n.includes('cheque') || n.includes('guarantee') || n.includes('emd') || n.includes('cpbg')) return 'Finance';
   if (n.includes('iso') || n.includes('bis') || n.includes('quality') || n.includes('test certificate') || n.includes('sa8000')) return 'Quality';
   if (n.includes('integrity') || n.includes('ehs') || n.includes('compliance') || n.includes('terms') || n.includes('gtc') || n.includes('atc')) return 'Compliance';
   if (n.includes('price') || n.includes('boq') || n.includes('bid value') || n.includes('rate')) return 'Pricing';
@@ -431,12 +432,7 @@ function inferTag(name) {
 }
 
 function buildChecklistFromScan() {
-  if (!scannedRequirements || scannedRequirements.length === 0) {
-    go('checklist');
-    return;
-  }
-  // Convert scanned requirements into CL_ITEMS format
-  // Clear old items and rebuild from scan
+  if (!scannedRequirements || scannedRequirements.length === 0) { go('checklist'); return; }
   CL_ITEMS.length = 0;
   scannedRequirements.forEach(req => {
     CL_ITEMS.push({ n: req, d: 'Required for this tender submission.', t: inferTag(req), s: 'pending' });
@@ -470,11 +466,8 @@ function toggleCl(i) {
 }
 
 // ── VALIDATOR ─────────────────────────────────────────────────────────────────
+const valUploads = {};
 
-// Track upload state per requirement index
-const valUploads = {}; // index -> { name, status }
-
-// Statuses cycle: some valid, one expiring, makes it look real
 function mockStatus(i) {
   return { s: 'pass', label: 'Valid · Verified', icon: 'ti-check' };
 }
@@ -482,23 +475,18 @@ function mockStatus(i) {
 function renderValidator() {
   const noScan = document.getElementById('val-no-scan');
   const main = document.getElementById('val-main');
-
   if (!CL_ITEMS || CL_ITEMS.length === 0) {
     noScan.style.display = 'block';
     main.style.display = 'none';
     return;
   }
-
   noScan.style.display = 'none';
   main.style.display = 'block';
-
   const uploaded = Object.keys(valUploads).length;
   const total = CL_ITEMS.length;
   const pct = total ? Math.round(uploaded / total * 100) : 0;
-
   document.getElementById('val-count').textContent = `${uploaded} of ${total} uploaded`;
   document.getElementById('val-bar').style.width = pct + '%';
-
   document.getElementById('val-rows').innerHTML = CL_ITEMS.map((item, i) => {
     const up = valUploads[i];
     const st = up ? mockStatus(i) : null;
@@ -525,29 +513,23 @@ function renderValidator() {
 function handleValUpload(i, input) {
   const file = input.files[0];
   if (!file) return;
-
-  // Show validating spinner
   document.getElementById(`vstatus-${i}`).innerHTML =
     `<span style="font-size:12px;color:var(--txm);display:flex;align-items:center;gap:6px"><div class="dot-loader"><span></span><span></span><span></span></div> Validating...</span>`;
-
   setTimeout(() => {
     valUploads[i] = { name: file.name };
     renderValidator();
   }, 1500);
 }
 
-function handleFiles(files) { /* legacy — no longer used */ }
+function handleFiles(files) {}
 function handleDrop(e) { e.preventDefault(); }
 
 function submitBid() {
   const uploaded = Object.keys(valUploads).length;
   const total = CL_ITEMS.length;
   const score = total ? Math.round((uploaded / total) * 100) : 100;
-
-  // Pull tender ID from scan result if available
   const tenderEl = document.querySelector('.mf-v');
   const tenderId = tenderEl ? tenderEl.textContent : 'Current Tender';
-
   document.getElementById('modal-tender-id').textContent = tenderId;
   document.getElementById('modal-docs').textContent = `${uploaded}/${total} passed`;
   document.getElementById('modal-score').textContent = score + '%';
@@ -619,7 +601,7 @@ function testEmail(btn) {
   setTimeout(() => { btn.innerHTML = `<i class="ti ti-check"></i> Sent to ${email}`; btn.disabled = false; }, 1600);
 }
 
-// ── AI ADVISOR (REAL CLAUDE API) ──────────────────────────────────────────────
+// ── AI ADVISOR ────────────────────────────────────────────────────────────────
 function quickQ(q) {
   document.getElementById('chat-inp').value = q;
   sendChat();
@@ -631,22 +613,16 @@ async function sendChat() {
   if (!q) return;
   inp.value = '';
   const wrap = document.getElementById('chat-wrap');
-
-  // Add user message
   const userMsg = document.createElement('div');
   userMsg.className = 'msg user';
   userMsg.textContent = q;
   wrap.appendChild(userMsg);
-
-  // Add thinking indicator
   const aiMsg = document.createElement('div');
   aiMsg.className = 'msg ai';
   aiMsg.innerHTML = `<div class="msg-sender"><i class="ti ti-robot"></i> GeM Advisor</div><div class="thinking"><div class="dot-loader"><span></span><span></span><span></span></div> Thinking...</div>`;
   wrap.appendChild(aiMsg);
   wrap.scrollTop = wrap.scrollHeight;
-
   chatHistory.push({ role: 'user', content: q });
-
   try {
     const res = await fetch('/api/advisor', {
       method: 'POST',
