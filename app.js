@@ -260,6 +260,12 @@ function setLang(lang) {
   // Update sign out button
   const signOutBtn = document.querySelector('.signout-btn');
   if (signOutBtn) signOutBtn.innerHTML = `<i class="ti ti-logout"></i> ${t.signOut}`;
+
+  // Re-render dashboard with new language
+  renderDash();
+
+  // Close dropdown
+  document.getElementById('lang-menu').style.display = 'none';
 }
 
 // Close lang menu when clicking outside
@@ -295,23 +301,27 @@ function toggleMenu() {
 
 // ── DASHBOARD ─────────────────────────────────────────────────────────────────
 function renderDash() {
-  document.getElementById('dash-tenders').innerHTML = TENDERS.map(t => `
+  const t = LANG[currentLang] || LANG['en'];
+  const statusLabels = t.statusLabels || { 'In progress': 'In progress', 'Ready': 'Ready', 'Incomplete': 'Incomplete' };
+  document.getElementById('dash-tenders').innerHTML = TENDERS.map(tender => `
     <div class="tender-card">
       <div class="tender-card-top">
         <div>
-          <div class="tender-title">${t.title}</div>
-          <div class="tender-sub">${t.buyer} · Closes ${t.deadline} · ${t.val}</div>
+          <div class="tender-title">${tender.title}</div>
+          <div class="tender-sub">${tender.buyer} · Closes ${tender.deadline} · ${tender.val}</div>
         </div>
-        <span class="badge ${t.status === 'Ready' ? 'b-gn' : t.status === 'Incomplete' ? 'b-or' : 'b-nv'}">${t.status}</span>
+        <span class="badge ${tender.status === 'Ready' ? 'b-gn' : tender.status === 'Incomplete' ? 'b-or' : 'b-nv'}">${statusLabels[tender.status] || tender.status}</span>
       </div>
       <div style="margin-bottom:10px">
-        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--txm);margin-bottom:3px"><span>Compliance</span><span>${t.comp}%</span></div>
-        <div class="pb"><div class="pbf ${t.comp < 50 ? 'or' : ''}" style="width:${t.comp}%"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--txm);margin-bottom:3px">
+          <span>${t.compliance || 'Compliance'}</span><span>${tender.comp}%</span>
+        </div>
+        <div class="pb"><div class="pbf ${tender.comp < 50 ? 'or' : ''}" style="width:${tender.comp}%"></div></div>
       </div>
       <div class="btn-row">
-        <button class="btn btn-sm" onclick="go('checklist')">Checklist</button>
-        <button class="btn btn-sm" onclick="go('validator')">Documents</button>
-        <button class="btn btn-sm" onclick="go('advisor')"><i class="ti ti-robot"></i> AI help</button>
+        <button class="btn btn-sm" onclick="go('checklist')"><i class="ti ti-checklist"></i> ${t.checklist || 'Checklist'}</button>
+        <button class="btn btn-sm" onclick="go('validator')"><i class="ti ti-files"></i> ${t.documents || 'Documents'}</button>
+        <button class="btn btn-sm" onclick="go('advisor')"><i class="ti ti-robot"></i> ${t.aiHelp || 'AI help'}</button>
       </div>
     </div>`).join('');
 }
