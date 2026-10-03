@@ -73,7 +73,7 @@ If you cannot find specific info, use "Not specified" for strings, false for boo
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents })
+        body: JSON.stringify({ contents, generationConfig: { temperature: 0.1 } })
       }
     );
 
