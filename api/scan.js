@@ -13,7 +13,7 @@ module.exports = async function handler(req, res) {
   "tenderId": "tender ID or bid number",
   "category": "product/service category",
   "deadline": "bid end date in format 'Mon DD' e.g. 'Jun 28'",
-  "value": "estimated bid value in Indian Rupee format e.g. '₹3,40,000'",
+  "value": "total bid or contract value ONLY if explicitly stated in the document — do NOT calculate or estimate from quantity multiplied by price. Use 'Not specified' if no total value is stated.",
   "buyer": "buying organization name",
   "mseQuota": "MSE purchase preference details or 'Not specified'",
   "requirements": ["complete list of required documents, certificates, and compliance items"],
