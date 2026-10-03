@@ -356,7 +356,7 @@ async function runScan() {
   const res = document.getElementById('scan-result');
   res.style.display = 'none';
   bar.classList.add('show');
-  const msgs = ['Reading document...', 'Applying OCR...', 'AI extracting requirements...', 'Parsing details...'];
+  const msgs = ['Reading document...', 'Applying OCR...', 'AI extracting requirements...', 'Analysing bid intelligence...'];
   let i = 0;
   const iv = setInterval(() => {
     document.getElementById('scan-status').textContent = msgs[Math.min(i, msgs.length-1)];
@@ -404,6 +404,7 @@ async function runScan() {
     ].map(f => `<div class="meta-field"><div class="mf-l">${f.l}</div><div class="mf-v">${f.v}</div></div>`).join('');
     const reqs = data.requirements || OCR_REQS;
     scannedRequirements = reqs;
+    renderTenderIntelligence(data);
     document.getElementById('ocr-reqs').innerHTML = reqs.map(r => `
       <div class="req-row">
         <i class="ti ti-file-text" style="font-size:15px;color:var(--nv-m);flex-shrink:0"></i>
@@ -415,6 +416,151 @@ async function runScan() {
     bar.classList.remove('show');
     alert('Error: ' + err.message);
   }
+}
+
+// ── TENDER INTELLIGENCE ───────────────────────────────────────────────────────
+function estimateDays(deadlineStr) {
+  if (!deadlineStr || deadlineStr === 'Not specified') return null;
+  const months = { Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11 };
+  const parts = String(deadlineStr).trim().split(/[\s,]+/);
+  if (parts.length < 2) return null;
+  const mon = months[parts[0]];
+  const day = parseInt(parts[1]);
+  if (mon === undefined || isNaN(day)) return null;
+  const now = new Date();
+  let year = now.getFullYear();
+  const target = new Date(year, mon, day);
+  if (target < now) target.setFullYear(year + 1);
+  return Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+}
+
+function estimateEMD(valueStr) {
+  if (!valueStr || valueStr === 'Not specified') return 'GeM Exempt';
+  const num = parseFloat(String(valueStr).replace(/[₹,\s]/g, ''));
+  if (isNaN(num)) return 'GeM Exempt';
+  const emd = Math.round(num * 0.02);
+  if (emd < 1000) return 'GeM Exempt';
+  return '₹' + emd.toLocaleString('en-IN');
+}
+
+function classifyBuyer(buyer) {
+  if (!buyer) return { label: 'Government', icon: 'ti-building', color: 'var(--nv-m)' };
+  const b = buyer.toLowerCase();
+  if (b.includes('ministry') || b.includes('dept') || b.includes('dopt') || b.includes('central')) return { label: 'Central Govt', icon: 'ti-building-government', color: 'var(--nv-m)' };
+  if (b.includes('aiims') || b.includes('hospital') || b.includes('health')) return { label: 'Healthcare PSU', icon: 'ti-building-hospital', color: 'var(--pu)' };
+  if (b.includes('nit') || b.includes('iit') || b.includes('university') || b.includes('college')) return { label: 'Educational Inst.', icon: 'ti-school', color: 'var(--gn)' };
+  if (b.includes('municipal') || b.includes('corporation') || b.includes('state')) return { label: 'State Govt', icon: 'ti-map-pin', color: 'var(--or)' };
+  if (b.includes('railway') || b.includes('defence') || b.includes('army') || b.includes('navy')) return { label: 'Defence / Railways', icon: 'ti-shield', color: 'var(--rd)' };
+  return { label: 'Govt Organisation', icon: 'ti-building', color: 'var(--nv-m)' };
+}
+
+function generateWarnings(data, score) {
+  const warnings = [];
+  const reqs = (data.requirements || []).map(r => r.toLowerCase()).join(' ');
+  if (reqs.includes('bank guarantee') || reqs.includes('cpbg')) warnings.push('Bank guarantee required — arrange with your bank in advance.');
+  if (reqs.includes('integrity pact')) warnings.push('Integrity pact must be signed by an authorised signatory.');
+  if (reqs.includes('iso') || reqs.includes('bis')) warnings.push('Quality certification (BIS/ISO) needed — may take weeks to obtain.');
+  if (data.daysLeft && data.daysLeft < 10) warnings.push('Tight deadline — less than 10 days remaining to submit.');
+  if (score < 40) warnings.push('Low bid score — this tender may have heavy documentation burden for small MSMEs.');
+  return warnings.slice(0, 3);
+}
+
+function generateAINote(data, score, compLevel) {
+  if (score >= 70 && data.msePref) return 'This tender looks well-suited for your MSME. MSE purchase preference applies, giving you a price advantage of up to 15% over non-MSE bidders. Ensure your Udyam certificate is valid and submit early to avoid last-minute issues.';
+  if (score >= 70) return 'This is a good opportunity for your business. The value and requirements are manageable for a small MSME. Focus on getting all documents ready at least 48 hours before the deadline.';
+  if (score >= 50 && compLevel === 'High') return 'Moderate fit, but competition is likely high in this category. Price your bid carefully and highlight your MSE status prominently. Ensure all quality certificates are current before bidding.';
+  if (score < 40) return 'This tender has a heavy compliance burden that may be challenging for small MSMEs. Review all requirements carefully before investing time in the bid. Consider consulting the AI Advisor for document-specific guidance.';
+  return 'Review the requirements carefully and check that you meet all eligibility criteria before bidding. Use the Compliance Checklist to track your document readiness, and reach out to the AI Advisor for any queries.';
+}
+
+function renderTenderIntelligence(data) {
+  const card = document.getElementById('ti-card');
+  if (!card) return;
+
+  const score = (typeof data.bidScore === 'number') ? data.bidScore : 65;
+  const compLevel = data.competitionLevel || 'Medium';
+  const msePref = !!data.msePref;
+  const daysLeft = data.daysLeft || estimateDays(data.deadline) || '—';
+  const emd = (data.emd && data.emd !== 'Not specified') ? data.emd : estimateEMD(data.value);
+  const expYrs = data.experienceRequired || 0;
+  const turnover = data.turnoverRequired || 'Not specified';
+  const warnings = (data.warnings && data.warnings.length) ? data.warnings : generateWarnings(data, score);
+  const aiNote = data.aiNote || generateAINote(data, score, compLevel);
+  const buyer = classifyBuyer(data.buyer);
+
+  const scoreColor = score >= 70 ? 'var(--gn)' : score >= 45 ? 'var(--or)' : 'var(--rd)';
+  const scoreLabel = score >= 70 ? 'Good fit' : score >= 45 ? 'Moderate fit' : 'Challenging';
+  const compColor = compLevel === 'Low' ? 'var(--gn)' : compLevel === 'High' ? 'var(--rd)' : 'var(--or)';
+  const daysColor = (typeof daysLeft === 'number' && daysLeft < 7) ? 'var(--rd)' : (typeof daysLeft === 'number' && daysLeft < 14) ? 'var(--or)' : 'var(--gn)';
+
+  card.innerHTML = `
+    <div class="ti-header">
+      <div class="ti-title"><i class="ti ti-chart-bar"></i> Tender Intelligence</div>
+      <span class="badge b-pu">AI Analysis</span>
+    </div>
+
+    <div class="ti-score-row">
+      <div class="ti-score-ring" style="--score-color:${scoreColor}">
+        <svg viewBox="0 0 36 36" class="ti-ring-svg">
+          <path class="ti-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+          <path class="ti-ring-fill" stroke="${scoreColor}" stroke-dasharray="${score}, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+        </svg>
+        <div class="ti-score-num" style="color:${scoreColor}">${score}</div>
+      </div>
+      <div class="ti-score-meta">
+        <div class="ti-score-label" style="color:${scoreColor}">${scoreLabel}</div>
+        <div class="ti-score-sub">MSME Bid Score</div>
+        <div class="ti-pills">
+          <span class="ti-pill" style="background:${compColor}20;color:${compColor};border-color:${compColor}40">
+            <i class="ti ti-users" style="font-size:10px"></i> ${compLevel} competition
+          </span>
+          ${msePref ? `<span class="ti-pill" style="background:var(--gn)20;color:var(--gn);border-color:var(--gn)40"><i class="ti ti-discount-2" style="font-size:10px"></i> MSE preference</span>` : ''}
+        </div>
+      </div>
+    </div>
+
+    <div class="ti-grid">
+      <div class="ti-stat">
+        <div class="ti-stat-icon" style="color:${daysColor}"><i class="ti ti-clock"></i></div>
+        <div class="ti-stat-val" style="color:${daysColor}">${typeof daysLeft === 'number' ? daysLeft + 'd' : daysLeft}</div>
+        <div class="ti-stat-lbl">Days left</div>
+      </div>
+      <div class="ti-stat">
+        <div class="ti-stat-icon" style="color:var(--nv-m)"><i class="ti ti-cash"></i></div>
+        <div class="ti-stat-val">${emd}</div>
+        <div class="ti-stat-lbl">EMD</div>
+      </div>
+      <div class="ti-stat">
+        <div class="ti-stat-icon" style="color:${buyer.color}"><i class="ti ${buyer.icon}"></i></div>
+        <div class="ti-stat-val" style="font-size:11px;line-height:1.3">${buyer.label}</div>
+        <div class="ti-stat-lbl">Buyer type</div>
+      </div>
+      <div class="ti-stat">
+        <div class="ti-stat-icon" style="color:var(--pu)"><i class="ti ti-briefcase"></i></div>
+        <div class="ti-stat-val">${expYrs > 0 ? expYrs + ' yr' + (expYrs > 1 ? 's' : '') : 'None'}</div>
+        <div class="ti-stat-lbl">Exp. required</div>
+      </div>
+    </div>
+
+    ${turnover !== 'Not specified' ? `
+    <div class="ti-row">
+      <i class="ti ti-report-money" style="color:var(--txm);font-size:14px"></i>
+      <span class="ti-row-lbl">Min. turnover required:</span>
+      <span class="ti-row-val">${turnover}</span>
+    </div>` : ''}
+
+    ${warnings.length ? `
+    <div class="ti-warnings">
+      <div class="ti-warn-title"><i class="ti ti-alert-triangle"></i> Watch out</div>
+      ${warnings.map(w => `<div class="ti-warn-item"><i class="ti ti-point-filled" style="font-size:8px;color:var(--or)"></i>${w}</div>`).join('')}
+    </div>` : ''}
+
+    <div class="ti-ai-note">
+      <div class="ti-ai-icon"><i class="ti ti-robot"></i></div>
+      <div class="ti-ai-text">${aiNote}</div>
+    </div>
+  `;
+  card.style.display = 'block';
 }
 
 // ── CHECKLIST ─────────────────────────────────────────────────────────────────
