@@ -460,7 +460,7 @@ function generateWarnings(data, score) {
   if (reqs.includes('bank guarantee') || reqs.includes('cpbg')) warnings.push('Bank guarantee required — arrange with your bank in advance.');
   if (reqs.includes('integrity pact')) warnings.push('Integrity pact must be signed by an authorised signatory.');
   if (reqs.includes('iso') || reqs.includes('bis')) warnings.push('Quality certification (BIS/ISO) needed — may take weeks to obtain.');
-  if (data.daysLeft && data.daysLeft < 10) warnings.push('Tight deadline — less than 10 days remaining to submit.');
+  if (data.daysLeft > 0 && data.daysLeft < 10) warnings.push('Tight deadline — less than 10 days remaining to submit.');
   if (score < 40) warnings.push('Low bid score — this tender may have heavy documentation burden for small MSMEs.');
   return warnings.slice(0, 3);
 }
@@ -480,7 +480,10 @@ function renderTenderIntelligence(data) {
   const score = (typeof data.bidScore === 'number') ? data.bidScore : 65;
   const compLevel = data.competitionLevel || 'Medium';
   const msePref = !!data.msePref;
-  const daysLeft = data.daysLeft || estimateDays(data.deadline) || '—';
+  const daysLeft = (data.daysLeft !== undefined && data.daysLeft !== null)
+    ? data.daysLeft
+    : (estimateDays(data.deadline) ?? '—');
+  const isClosed = typeof daysLeft === 'number' && daysLeft <= 0;
   const emd = (data.emd && data.emd !== 'Not specified') ? data.emd : estimateEMD(data.value);
   const expYrs = data.experienceRequired || 0;
   const turnover = data.turnoverRequired || 'Not specified';
@@ -491,7 +494,10 @@ function renderTenderIntelligence(data) {
   const scoreColor = score >= 70 ? 'var(--gn)' : score >= 45 ? 'var(--or)' : 'var(--rd)';
   const scoreLabel = score >= 70 ? 'Good fit' : score >= 45 ? 'Moderate fit' : 'Challenging';
   const compColor = compLevel === 'Low' ? 'var(--gn)' : compLevel === 'High' ? 'var(--rd)' : 'var(--or)';
-  const daysColor = (typeof daysLeft === 'number' && daysLeft < 7) ? 'var(--rd)' : (typeof daysLeft === 'number' && daysLeft < 14) ? 'var(--or)' : 'var(--gn)';
+  const daysColor = isClosed ? 'var(--txm)'
+    : (typeof daysLeft === 'number' && daysLeft < 7) ? 'var(--rd)'
+    : (typeof daysLeft === 'number' && daysLeft < 14) ? 'var(--or)'
+    : 'var(--gn)';
 
   card.innerHTML = `
     <div class="ti-header">
@@ -522,7 +528,7 @@ function renderTenderIntelligence(data) {
     <div class="ti-grid">
       <div class="ti-stat">
         <div class="ti-stat-icon" style="color:${daysColor}"><i class="ti ti-clock"></i></div>
-        <div class="ti-stat-val" style="color:${daysColor}">${typeof daysLeft === 'number' ? daysLeft + 'd' : daysLeft}</div>
+        <div class="ti-stat-val" style="color:${daysColor}">${isClosed ? 'Closed' : typeof daysLeft === 'number' ? daysLeft + 'd' : daysLeft}</div>
         <div class="ti-stat-lbl">Days left</div>
       </div>
       <div class="ti-stat">
