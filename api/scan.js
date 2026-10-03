@@ -85,6 +85,21 @@ If you cannot find specific info, use "Not specified" for strings, false for boo
     let text = data.candidates[0].content.parts[0].text;
     text = text.replace(/```json|```/g, '').trim();
     const parsed = JSON.parse(text);
+
+    // Override daysLeft with accurate server-side calculation
+    // Never trust Gemini to know today's date
+    if (parsed.deadline) {
+      const months = { Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11 };
+      const parts = parsed.deadline.split(' ');
+      if (parts.length === 2 && months[parts[0]] !== undefined) {
+        const now = new Date();
+        const d = new Date(now.getFullYear(), months[parts[0]], parseInt(parts[1]));
+        // If the date has already passed this year, it must be next year
+        if (d < now) d.setFullYear(d.getFullYear() + 1);
+        parsed.daysLeft = Math.round((d - now) / 86400000);
+      }
+    }
+
     res.json(parsed);
   } catch (err) {
     res.status(500).json({ error: "Failed to analyze: " + err.message });
