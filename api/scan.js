@@ -7,25 +7,33 @@ module.exports = async function handler(req, res) {
   const { url, fileBase64, fileType, fileText } = req.body;
   if (!url && !fileBase64 && !fileText) return res.status(400).json({ error: "URL, file, or text required" });
 
-  const prompt = `You are analyzing a Government e-Marketplace (GeM) tender document. Extract the following and respond in JSON format only, no markdown:
+  const prompt = `You are analyzing a Government e-Marketplace (GeM) tender document for an Indian MSME seller. Extract the following and respond in JSON format only, no markdown:
 
 {
   "tenderId": "tender ID or bid number",
   "category": "product/service category",
-  "deadline": "bid end date and time",
-  "value": "estimated bid value",
+  "deadline": "bid end date in format 'Mon DD' e.g. 'Jun 28'",
+  "value": "estimated bid value in Indian Rupee format e.g. '₹3,40,000'",
   "buyer": "buying organization name",
-  "mseQuota": "MSE purchase preference details",
-  "requirements": ["complete list of required documents, certificates, and compliance items"]
+  "mseQuota": "MSE purchase preference details or 'Not specified'",
+  "requirements": ["complete list of required documents, certificates, and compliance items"],
+  "bidScore": <integer 0-100: how well-suited this tender is for a typical small Indian MSME — consider value size, documentation burden, timeline, competition likely>,
+  "competitionLevel": "<Low|Medium|High>: expected competition level based on category and buyer type",
+  "msePref": <true|false: whether MSE price preference or purchase preference is explicitly mentioned>,
+  "daysLeft": <integer: estimated days until bid deadline from today October 2026>,
+  "emd": "Earnest Money Deposit amount if specified, else 'GeM Exempt'",
+  "experienceRequired": <integer: years of prior supply experience required, 0 if none>,
+  "turnoverRequired": "minimum annual turnover required e.g. '₹10,00,000' or 'Not specified'",
+  "warnings": ["list of up to 3 important cautions or risks for MSME bidders"],
+  "aiNote": "one short paragraph (2-3 sentences) of AI advice for an MSME bidder considering this tender"
 }
 
-If you cannot find specific info, use "Not specified". For requirements, extract ALL documents mentioned including certificates, bank guarantees, compliance documents, integrity pacts, questionnaires etc.`;
+If you cannot find specific info, use "Not specified" for strings, false for booleans, 0 for numbers. For requirements, extract ALL documents mentioned including certificates, bank guarantees, compliance documents, integrity pacts, questionnaires etc.`;
 
   try {
     let contents;
 
     if (fileBase64 && fileType) {
-      // Send PDF/image directly to Gemini for native understanding
       contents = [{
         parts: [
           { text: prompt },
@@ -38,7 +46,6 @@ If you cannot find specific info, use "Not specified". For requirements, extract
         ]
       }];
     } else {
-      // URL fetch or plain text fallback
       let pageText = fileText || '';
       if (!pageText && url) {
         try {
