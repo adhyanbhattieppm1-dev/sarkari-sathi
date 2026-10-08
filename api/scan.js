@@ -89,12 +89,21 @@ If you cannot find specific info, use "Not specified" for strings, false for boo
     // Override daysLeft with accurate server-side calculation
     // Never trust Gemini to know today's date
     if (parsed.deadline) {
-      const months = { Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11 };
-      const parts = parsed.deadline.split(' ');
-      if (parts.length === 2 && months[parts[0]] !== undefined) {
+      const months = { Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11,
+                       January:0,February:1,March:2,April:3,May:4,June:5,July:6,August:7,September:8,October:9,November:10,December:11 };
+      let day, month, year;
+      // Try "DD-Mon-YYYY" or "DD-Mon" e.g. "14-Oct-2026"
+      const fmt1 = parsed.deadline.match(/(\d{1,2})[-\/]([A-Za-z]+)[-\/]?(\d{4})?/);
+      // Try "Mon DD" or "Mon DD, YYYY" e.g. "Oct 14" or "October 14, 2026"
+      const fmt2 = parsed.deadline.match(/([A-Za-z]+)\s+(\d{1,2})[,\s]*(\d{4})?/);
+      if (fmt1) {
+        day = parseInt(fmt1[1]); month = months[fmt1[2]]; year = fmt1[3] ? parseInt(fmt1[3]) : new Date().getFullYear();
+      } else if (fmt2) {
+        month = months[fmt2[1]]; day = parseInt(fmt2[2]); year = fmt2[3] ? parseInt(fmt2[3]) : new Date().getFullYear();
+      }
+      if (day && month !== undefined) {
         const now = new Date();
-        const d = new Date(now.getFullYear(), months[parts[0]], parseInt(parts[1]));
-        // Do NOT roll forward to next year — a past deadline should show as negative
+        const d = new Date(year || now.getFullYear(), month, day);
         parsed.daysLeft = Math.round((d - now) / 86400000);
       }
     }
