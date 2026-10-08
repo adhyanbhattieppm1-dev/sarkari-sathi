@@ -68,18 +68,36 @@ If you cannot find specific info, use "Not specified" for strings, false for boo
       contents = [{ parts: [{ text: prompt + '\n\nDocument text:\n' + pageText }] }];
     }
 
-    const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents, generationConfig: { temperature: 0.1 } })
-      }
-    );
+    // Try models in order until one works
+    const models = [
+      'gemini-2.0-flash-lite',
+      'gemini-2.0-flash',
+      'gemini-1.5-flash',
+      'gemini-1.5-flash-latest',
+      'gemini-pro'
+    ];
+    const endpoints = ['v1', 'v1beta'];
 
-    const data = await geminiRes.json();
-    if (!data.candidates) {
-      return res.json({ error: "Gemini error: " + JSON.stringify(data) });
+    let data = null;
+    let lastError = '';
+    outer: for (const ver of endpoints) {
+      for (const model of models) {
+        const r = await fetch(
+          `https://generativelanguage.googleapis.com/${ver}/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ contents, generationConfig: { temperature: 0.1 } })
+          }
+        );
+        const d = await r.json();
+        if (d.candidates) { data = d; break outer; }
+        lastError = `${model}@${ver}: ` + JSON.stringify(d).slice(0, 120);
+      }
+    }
+
+    if (!data) {
+      return res.json({ error: "Gemini error (all models failed). Last: " + lastError });
     }
 
     let text = data.candidates[0].content.parts[0].text;
