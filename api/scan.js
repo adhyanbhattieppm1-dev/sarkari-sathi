@@ -70,14 +70,11 @@ If you cannot find specific info, use "Not specified" for strings, false for boo
 
     const key = process.env.GEMINI_API_KEY;
 
-    // Try models in order — newer AI Studio keys support gemini-2.x
     const models = [
-      { ver: 'v1beta', model: 'gemini-2.0-flash-exp' },
-      { ver: 'v1beta', model: 'gemini-2.0-flash' },
-      { ver: 'v1beta', model: 'gemini-2.0-flash-lite' },
-      { ver: 'v1beta', model: 'gemini-1.5-flash' },
-      { ver: 'v1', model: 'gemini-2.0-flash' },
-      { ver: 'v1', model: 'gemini-1.5-flash' },
+      { ver: 'v1', model: 'gemini-2.5-flash' },
+      { ver: 'v1', model: 'gemini-2.5-flash-lite' },
+      { ver: 'v1beta', model: 'gemini-2.5-flash' },
+      { ver: 'v1beta', model: 'gemini-flash-latest' },
     ];
 
     let data = null;
