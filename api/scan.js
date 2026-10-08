@@ -68,28 +68,28 @@ If you cannot find specific info, use "Not specified" for strings, false for boo
       contents = [{ parts: [{ text: prompt + '\n\nDocument text:\n' + pageText }] }];
     }
 
+    const key = process.env.GEMINI_API_KEY;
+    const isBearer = key && key.startsWith('AQ.');
+
     // Try models in order until one works
-    const models = [
-      'gemini-2.0-flash-lite',
-      'gemini-2.0-flash',
-      'gemini-1.5-flash',
-      'gemini-1.5-flash-latest',
-      'gemini-pro'
-    ];
-    const endpoints = ['v1', 'v1beta'];
+    const models = ['gemini-2.0-flash-lite', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-latest'];
+    const vers = ['v1', 'v1beta'];
 
     let data = null;
     let lastError = '';
-    outer: for (const ver of endpoints) {
+    outer: for (const ver of vers) {
       for (const model of models) {
-        const r = await fetch(
-          `https://generativelanguage.googleapis.com/${ver}/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ contents, generationConfig: { temperature: 0.1 } })
-          }
-        );
+        const url = isBearer
+          ? `https://generativelanguage.googleapis.com/${ver}/models/${model}:generateContent`
+          : `https://generativelanguage.googleapis.com/${ver}/models/${model}:generateContent?key=${key}`;
+        const headers = { "Content-Type": "application/json" };
+        if (isBearer) headers["Authorization"] = `Bearer ${key}`;
+
+        const r = await fetch(url, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ contents, generationConfig: { temperature: 0.1 } })
+        });
         const d = await r.json();
         if (d.candidates) { data = d; break outer; }
         lastError = `${model}@${ver}: ` + JSON.stringify(d).slice(0, 120);
