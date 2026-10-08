@@ -485,7 +485,7 @@ function renderTenderIntelligence(data) {
     : (estimateDays(data.deadline) ?? '—');
   const isClosed = typeof daysLeft === 'number' && daysLeft <= 0;
   const emdRaw = (data.emd && data.emd !== 'Not specified') ? data.emd : estimateEMD(data.value);
-  const emd = typeof emdRaw === 'string' ? emdRaw.split('(')[0].split('.')[0].split(',')[0].trim() : emdRaw;
+  const emd = typeof emdRaw === 'string' ? emdRaw.split('(')[0].split('.')[0].trim() : emdRaw;
   const expYrs = data.experienceRequired || 0;
   const turnover = data.turnoverRequired || 'Not specified';
   const warnings = (data.warnings && data.warnings.length) ? data.warnings : generateWarnings(data, score);
@@ -507,12 +507,16 @@ function renderTenderIntelligence(data) {
     </div>
 
     <div class="ti-score-row">
-      <div class="ti-score-ring" style="--score-color:${scoreColor}">
-        <svg viewBox="0 0 36 36" class="ti-ring-svg">
-          <path class="ti-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-          <path class="ti-ring-fill" stroke="${scoreColor}" stroke-dasharray="${score}, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+      <div class="ti-score-ring">
+        <svg viewBox="0 0 72 72" width="72" height="72" style="display:block">
+          <circle cx="36" cy="36" r="30" fill="none" stroke="var(--border)" stroke-width="6"/>
+          <circle cx="36" cy="36" r="30" fill="none" stroke="${scoreColor}" stroke-width="6"
+            stroke-linecap="round"
+            stroke-dasharray="${Math.round(score * 1.885)}, 188.5"
+            transform="rotate(-90 36 36)"/>
+          <text x="36" y="36" text-anchor="middle" dominant-baseline="central"
+            font-size="18" font-weight="700" fill="${scoreColor}">${score}</text>
         </svg>
-        <div class="ti-score-num" style="color:${scoreColor}">${score}</div>
       </div>
       <div class="ti-score-meta">
         <div class="ti-score-label" style="color:${scoreColor}">${scoreLabel}</div>
