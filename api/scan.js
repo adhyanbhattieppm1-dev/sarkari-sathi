@@ -69,31 +69,31 @@ If you cannot find specific info, use "Not specified" for strings, false for boo
     }
 
     const key = process.env.GEMINI_API_KEY;
-    const isBearer = key && key.startsWith('AQ.');
 
-    // Try models in order until one works
-    const models = ['gemini-2.0-flash-lite', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-latest'];
-    const vers = ['v1', 'v1beta'];
+    // Try models in order — newer AI Studio keys support gemini-2.x
+    const models = [
+      { ver: 'v1beta', model: 'gemini-2.0-flash-exp' },
+      { ver: 'v1beta', model: 'gemini-2.0-flash' },
+      { ver: 'v1beta', model: 'gemini-2.0-flash-lite' },
+      { ver: 'v1beta', model: 'gemini-1.5-flash' },
+      { ver: 'v1', model: 'gemini-2.0-flash' },
+      { ver: 'v1', model: 'gemini-1.5-flash' },
+    ];
 
     let data = null;
     let lastError = '';
-    outer: for (const ver of vers) {
-      for (const model of models) {
-        const url = isBearer
-          ? `https://generativelanguage.googleapis.com/${ver}/models/${model}:generateContent`
-          : `https://generativelanguage.googleapis.com/${ver}/models/${model}:generateContent?key=${key}`;
-        const headers = { "Content-Type": "application/json" };
-        if (isBearer) headers["Authorization"] = `Bearer ${key}`;
-
-        const r = await fetch(url, {
+    for (const { ver, model } of models) {
+      const r = await fetch(
+        `https://generativelanguage.googleapis.com/${ver}/models/${model}:generateContent?key=${key}`,
+        {
           method: "POST",
-          headers,
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ contents, generationConfig: { temperature: 0.1 } })
-        });
-        const d = await r.json();
-        if (d.candidates) { data = d; break outer; }
-        lastError = `${model}@${ver}: ` + JSON.stringify(d).slice(0, 120);
-      }
+        }
+      );
+      const d = await r.json();
+      if (d.candidates) { data = d; break; }
+      lastError = `${model}@${ver}: ` + JSON.stringify(d).slice(0, 150);
     }
 
     if (!data) {
