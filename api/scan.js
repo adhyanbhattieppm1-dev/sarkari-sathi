@@ -17,7 +17,7 @@ module.exports = async function handler(req, res) {
   "buyer": "buying organization name",
   "mseQuota": "MSE purchase preference details or 'Not specified'",
   "requirements": ["complete list of required documents, certificates, and compliance items"],
-  "bidScore": <integer 0-100: how well-suited this tender is for a typical small Indian MSME — consider value size, documentation burden, timeline, competition likely>,
+  "bidScore": <integer 0-100: how well-suited this tender is for a typical small Indian MSME. Score ONLY on MSME fit: category accessibility, documentation burden, EMD affordability, MSE preference, experience/turnover requirements, and competition level. Do NOT reduce the score based on deadline dates — deadline is shown separately and scoring on it causes confusion>,
   "competitionLevel": "<Low|Medium|High>: expected competition level based on category and buyer type",
   "msePref": <true|false: whether MSE price preference or purchase preference is explicitly mentioned>,
   "daysLeft": <integer: estimated days until bid deadline from today October 2026>,
@@ -94,8 +94,7 @@ If you cannot find specific info, use "Not specified" for strings, false for boo
       if (parts.length === 2 && months[parts[0]] !== undefined) {
         const now = new Date();
         const d = new Date(now.getFullYear(), months[parts[0]], parseInt(parts[1]));
-        // If the date has already passed this year, it must be next year
-        if (d < now) d.setFullYear(d.getFullYear() + 1);
+        // Do NOT roll forward to next year — a past deadline should show as negative
         parsed.daysLeft = Math.round((d - now) / 86400000);
       }
     }
