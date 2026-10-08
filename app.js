@@ -484,7 +484,8 @@ function renderTenderIntelligence(data) {
     ? data.daysLeft
     : (estimateDays(data.deadline) ?? '—');
   const isClosed = typeof daysLeft === 'number' && daysLeft <= 0;
-  const emd = (data.emd && data.emd !== 'Not specified') ? data.emd : estimateEMD(data.value);
+  const emdRaw = (data.emd && data.emd !== 'Not specified') ? data.emd : estimateEMD(data.value);
+  const emd = typeof emdRaw === 'string' ? emdRaw.split('(')[0].split('.')[0].split(',')[0].trim() : emdRaw;
   const expYrs = data.experienceRequired || 0;
   const turnover = data.turnoverRequired || 'Not specified';
   const warnings = (data.warnings && data.warnings.length) ? data.warnings : generateWarnings(data, score);
