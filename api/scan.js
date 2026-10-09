@@ -72,7 +72,7 @@ If you cannot find specific info, use "Not specified" for strings, false for boo
 
     const models = [
       { ver: 'v1', model: 'gemini-2.5-flash' },
-      { ver: 'v1', model: 'gemini-2.5-flash-lite' },
+      { ver: 'v1', model: 'gemini-2.0-flash' },
     ];
 
     let data = null;
