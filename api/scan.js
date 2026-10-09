@@ -71,10 +71,7 @@ If you cannot find specific info, use "Not specified" for strings, false for boo
     const key = process.env.GEMINI_API_KEY;
 
     const models = [
-      { ver: 'v1', model: 'gemini-3.8-flash' },
-      { ver: 'v1beta', model: 'gemini-3.8-flash' },
-      { ver: 'v1', model: 'gemini-3.5-flash' },
-      { ver: 'v1beta', model: 'gemini-3.5-flash' },
+      { ver: 'v1', model: 'gemini-2.5-flash' },
       { ver: 'v1', model: 'gemini-2.5-flash-lite' },
     ];
 
