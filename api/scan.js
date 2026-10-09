@@ -81,26 +81,22 @@ If you cannot find specific info, use "Not specified" for strings, false for boo
     let data = null;
     let lastError = '';
     for (const { ver, model } of models) {
-      // Retry up to 3 times on 503
-      for (let attempt = 0; attempt < 3; attempt++) {
+      try {
         const r = await fetch(
           `https://generativelanguage.googleapis.com/${ver}/models/${model}:generateContent?key=${key}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ contents, generationConfig: { temperature: 0.1 } })
+            body: JSON.stringify({ contents, generationConfig: { temperature: 0.1 } }),
+            signal: AbortSignal.timeout(8000)
           }
         );
         const d = await r.json();
         if (d.candidates) { data = d; break; }
         lastError = `${model}@${ver}: ` + JSON.stringify(d).slice(0, 150);
-        if (d.error && d.error.code === 503) {
-          await new Promise(r => setTimeout(r, 2000)); // wait 2s before retry
-          continue;
-        }
-        break; // non-503 error, try next model
+      } catch(e) {
+        lastError = `${model}@${ver}: timeout/network`;
       }
-      if (data) break;
     }
 
     if (!data) {
