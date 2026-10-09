@@ -71,13 +71,14 @@ If you cannot find specific info, use "Not specified" for strings, false for boo
     const key = process.env.GEMINI_API_KEY;
 
     const models = [
-      { ver: 'v1', model: 'gemini-2.5-flash' },
-      { ver: 'v1', model: 'gemini-3.8-flash' },
+      { ver: 'v1', model: 'gemini-2.5-flash', timeout: 25000 },
+      { ver: 'v1', model: 'gemini-3.8-flash', timeout: 20000 },
+      { ver: 'v1', model: 'gemini-3.5-flash', timeout: 20000 },
     ];
 
     let data = null;
     let lastError = '';
-    for (const { ver, model } of models) {
+    for (const { ver, model, timeout } of models) {
       try {
         const r = await fetch(
           `https://generativelanguage.googleapis.com/${ver}/models/${model}:generateContent?key=${key}`,
@@ -85,14 +86,14 @@ If you cannot find specific info, use "Not specified" for strings, false for boo
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ contents, generationConfig: { temperature: 0.1 } }),
-            signal: AbortSignal.timeout(8000)
+            signal: AbortSignal.timeout(timeout)
           }
         );
         const d = await r.json();
         if (d.candidates) { data = d; break; }
         lastError = `${model}@${ver}: ` + JSON.stringify(d).slice(0, 150);
       } catch(e) {
-        lastError = `${model}@${ver}: timeout/network`;
+        lastError = `${model}@${ver}: ` + e.message;
       }
     }
 
